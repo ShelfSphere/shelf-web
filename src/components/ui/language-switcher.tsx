@@ -1,15 +1,13 @@
 "use client";
 
 import { useLocale } from "next-intl";
-import { useRouter, usePathname } from "next/navigation";
 import { useState, useRef, useEffect } from "react";
 import { Globe, ChevronDown, Check } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
-import { routing } from "@/i18n/routing";
 
+const LOCALES = ["en", "ru", "hy"] as const;
 const LABELS: Record<string, string> = { en: "EN", ru: "RU", hy: "HY" };
-
 const FULL_LABELS: Record<string, string> = {
   en: "English",
   ru: "Русский",
@@ -18,8 +16,6 @@ const FULL_LABELS: Record<string, string> = {
 
 export function LanguageSwitcher() {
   const locale = useLocale();
-  const router = useRouter();
-  const pathname = usePathname(); // full path e.g. "/ru/dashboard" or "/"
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
@@ -33,22 +29,16 @@ export function LanguageSwitcher() {
 
   const switchLocale = (next: string) => {
     if (next === locale) { setOpen(false); return; }
-
-    // Strip any existing locale prefix from the current path
-    let base = pathname;
-    for (const loc of routing.locales) {
-      if (pathname === `/${loc}`) { base = "/"; break; }
-      if (pathname.startsWith(`/${loc}/`)) { base = pathname.slice(loc.length + 1); break; }
+    // Persist in cookie so the server layout re-renders in the right locale
+    document.cookie = `lang=${next}; path=/; max-age=${60 * 60 * 24 * 365}; samesite=lax`;
+    // Update URL: keep current path, set ?lang= (omit for English)
+    const url = new URL(window.location.href);
+    if (next === "en") {
+      url.searchParams.delete("lang");
+    } else {
+      url.searchParams.set("lang", next);
     }
-
-    // Build new path — default locale (en) gets no prefix with as-needed
-    const newPath =
-      next === routing.defaultLocale
-        ? base || "/"
-        : `/${next}${base === "/" ? "" : base}`;
-
-    // Hard navigation so the server re-renders the layout with the new locale's messages
-    window.location.href = newPath;
+    window.location.href = url.toString();
   };
 
   return (
@@ -71,7 +61,7 @@ export function LanguageSwitcher() {
             transition={{ duration: 0.15 }}
             className="absolute right-0 mt-2 w-36 bg-[#111] border border-white/10 rounded-xl shadow-2xl overflow-hidden z-50"
           >
-            {routing.locales.map((loc) => (
+            {LOCALES.map((loc) => (
               <button
                 key={loc}
                 onClick={() => switchLocale(loc)}

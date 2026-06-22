@@ -1,11 +1,21 @@
-import createMiddleware from "next-intl/middleware";
-import { routing } from "./src/i18n/routing";
+import { NextResponse, type NextRequest } from "next/server";
 
-export default createMiddleware(routing);
+const LOCALES = ["en", "ru", "hy"] as const;
+
+export function middleware(request: NextRequest) {
+  const lang = request.nextUrl.searchParams.get("lang");
+  if (lang && (LOCALES as readonly string[]).includes(lang)) {
+    const response = NextResponse.next();
+    response.cookies.set("lang", lang, {
+      path: "/",
+      maxAge: 60 * 60 * 24 * 365,
+      sameSite: "lax",
+    });
+    return response;
+  }
+  return NextResponse.next();
+}
 
 export const config = {
-  matcher: [
-    // Match all paths except api routes, static files, and Next.js internals
-    "/((?!api|_next|_vercel|.*\\..*).*)",
-  ],
+  matcher: ["/((?!api|_next|_vercel|.*\\..*).*)" ],
 };
