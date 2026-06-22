@@ -70,6 +70,66 @@ const TIERS: {
 
 const MAX_PRICE = 15;
 
+function TierCard({ t, i }: { t: (typeof TIERS)[number]; i: number }) {
+  const Icon = t.icon;
+  return (
+    <motion.div
+      key={t.tier}
+      initial={{ opacity: 0, y: 40 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      transition={{ delay: i * 0.1, duration: 0.5, type: "spring", stiffness: 80 }}
+      whileHover={{ y: -6, transition: { duration: 0.2 } }}
+      className={cn(
+        "relative rounded-2xl border bg-gradient-to-b p-6 flex flex-col gap-4 hover:shadow-2xl transition-all duration-300 cursor-default",
+        t.gradient,
+        t.border,
+        t.glow
+      )}
+    >
+      {t.badge && (
+        <motion.span
+          initial={{ scale: 0 }}
+          whileInView={{ scale: 1 }}
+          viewport={{ once: true }}
+          transition={{ delay: i * 0.1 + 0.3, type: "spring", stiffness: 200 }}
+          className="absolute -top-3 left-1/2 -translate-x-1/2 text-xs font-bold bg-brand-green text-white px-3 py-0.5 rounded-full whitespace-nowrap shadow-lg shadow-brand-green/30"
+        >
+          {t.badge}
+        </motion.span>
+      )}
+
+      <div className={cn("w-11 h-11 rounded-xl flex items-center justify-center", t.iconBg)}>
+        <Icon size={20} className={t.iconColor} strokeWidth={1.75} />
+      </div>
+
+      <div>
+        <h3 className="font-bold text-white text-base">{t.full}</h3>
+        <p className="text-sm text-gray-500 mt-1 leading-relaxed">{t.description}</p>
+      </div>
+
+      <div className="mt-auto space-y-2">
+        <div className="flex justify-between items-center">
+          <span className="text-xs text-gray-600">from</span>
+          <span className="text-2xl font-extrabold text-white">
+            ${t.from}
+            <span className="text-xs font-normal text-gray-500"> /day</span>
+          </span>
+        </div>
+        <div className="w-full h-1 bg-white/5 rounded-full overflow-hidden">
+          <motion.div
+            initial={{ width: 0 }}
+            whileInView={{ width: `${(t.from / MAX_PRICE) * 100}%` }}
+            viewport={{ once: true }}
+            transition={{ delay: i * 0.1 + 0.4, duration: 0.8, ease: "easeOut" }}
+            className={cn("h-full rounded-full", t.barColor)}
+          />
+        </div>
+      </div>
+    </motion.div>
+  );
+}
+
 export function PricingTeaser() {
   return (
     <section id="pricing" className="py-28 bg-[#0a0a0a] relative overflow-hidden">
@@ -98,63 +158,7 @@ export function PricingTeaser() {
 
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {TIERS.map((t, i) => (
-            <motion.div
-              key={t.tier}
-              initial={{ opacity: 0, y: 40 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: i * 0.1, duration: 0.5, type: "spring", stiffness: 80 }}
-              whileHover={{ y: -6, transition: { duration: 0.2 } }}
-              className={cn(
-                "relative rounded-2xl border bg-gradient-to-b p-6 flex flex-col gap-4 hover:shadow-2xl transition-all duration-300 cursor-default",
-                t.gradient,
-                t.border,
-                t.glow
-              )}
-            >
-              {t.badge && (
-                <motion.span
-                  initial={{ scale: 0 }}
-                  whileInView={{ scale: 1 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: i * 0.1 + 0.3, type: "spring", stiffness: 200 }}
-                  className="absolute -top-3 left-1/2 -translate-x-1/2 text-xs font-bold bg-brand-green text-white px-3 py-0.5 rounded-full whitespace-nowrap shadow-lg shadow-brand-green/30"
-                >
-                  {t.badge}
-                </motion.span>
-              )}
-
-              {(() => { const Icon = t.icon; return (
-                <div className={cn("w-11 h-11 rounded-xl flex items-center justify-center", t.iconBg)}>
-                  <Icon size={20} className={t.iconColor} strokeWidth={1.75} />
-                </div>
-              );})()
-
-              <div>
-                <h3 className="font-bold text-white text-base">{t.full}</h3>
-                <p className="text-sm text-gray-500 mt-1 leading-relaxed">{t.description}</p>
-              </div>
-
-              {/* Animated price bar */}
-              <div className="mt-auto space-y-2">
-                <div className="flex justify-between items-center">
-                  <span className="text-xs text-gray-600">from</span>
-                  <span className="text-2xl font-extrabold text-white">
-                    ${t.from}
-                    <span className="text-xs font-normal text-gray-500"> /day</span>
-                  </span>
-                </div>
-                <div className="w-full h-1 bg-white/5 rounded-full overflow-hidden">
-                  <motion.div
-                    initial={{ width: 0 }}
-                    whileInView={{ width: `${(t.from / MAX_PRICE) * 100}%` }}
-                    viewport={{ once: true }}
-                    transition={{ delay: i * 0.1 + 0.4, duration: 0.8, ease: "easeOut" }}
-                    className={cn("h-full rounded-full", t.barColor)}
-                  />
-                </div>
-              </div>
-            </motion.div>
+            <TierCard key={t.tier} t={t} i={i} />
           ))}
         </div>
 
