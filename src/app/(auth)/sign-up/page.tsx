@@ -1,5 +1,6 @@
 "use client";
 
+import { Suspense } from "react";
 import { useState } from "react";
 import { signIn } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -21,7 +22,7 @@ const schema = z.object({
 });
 type FormData = z.infer<typeof schema>;
 
-export default function SignUpPage() {
+function SignUpForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const defaultRole = (searchParams.get("role") as UserRole) || "PRODUCT_OWNER";
@@ -120,5 +121,13 @@ export default function SignUpPage() {
         </Link>
       </p>
     </>
+  );
+}
+
+export default function SignUpPage() {
+  return (
+    <Suspense>
+      <SignUpForm />
+    </Suspense>
   );
 }
