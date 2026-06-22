@@ -1,13 +1,21 @@
 "use client";
 
 import { motion } from "framer-motion";
+import { ChevronsDown, ArrowLeftRight, Eye, ChevronsUp } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-const TIERS = [
+const TIERS: {
+  tier: string; full: string; icon: LucideIcon; iconBg: string; iconColor: string;
+  description: string; from: number; gradient: string; border: string;
+  glow: string; badge: string | null; barColor: string;
+}[] = [
   {
     tier: "Bottom",
     full: "Bottom shelf",
-    icon: "⬇️",
+    icon: ChevronsDown,
+    iconBg: "bg-slate-700/50",
+    iconColor: "text-slate-400",
     description: "Floor level. Budget-friendly, great for large or heavy items.",
     from: 2,
     gradient: "from-slate-800/60 to-slate-900/60",
@@ -19,7 +27,9 @@ const TIERS = [
   {
     tier: "Middle",
     full: "Middle shelf",
-    icon: "↔️",
+    icon: ArrowLeftRight,
+    iconBg: "bg-blue-500/15",
+    iconColor: "text-blue-400",
     description: "Mid-height. Balanced visibility and price for growing brands.",
     from: 5,
     gradient: "from-blue-900/30 to-slate-900/60",
@@ -31,7 +41,9 @@ const TIERS = [
   {
     tier: "Eye-level",
     full: "Eye-level shelf",
-    icon: "👁️",
+    icon: Eye,
+    iconBg: "bg-brand-green/15",
+    iconColor: "text-brand-green",
     description: "Premium placement. Proven to drive the highest conversion rates.",
     from: 12,
     gradient: "from-brand-green/15 to-slate-900/60",
@@ -43,7 +55,9 @@ const TIERS = [
   {
     tier: "Top",
     full: "Top shelf",
-    icon: "⬆️",
+    icon: ChevronsUp,
+    iconBg: "bg-purple-500/15",
+    iconColor: "text-purple-400",
     description: "Above eye-level. Great for tall, aspirational or premium products.",
     from: 7,
     gradient: "from-purple-900/30 to-slate-900/60",
@@ -110,7 +124,11 @@ export function PricingTeaser() {
                 </motion.span>
               )}
 
-              <div className="text-3xl">{t.icon}</div>
+              {(() => { const Icon = t.icon; return (
+                <div className={cn("w-11 h-11 rounded-xl flex items-center justify-center", t.iconBg)}>
+                  <Icon size={20} className={t.iconColor} strokeWidth={1.75} />
+                </div>
+              );})()
 
               <div>
                 <h3 className="font-bold text-white text-base">{t.full}</h3>

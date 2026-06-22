@@ -2,9 +2,10 @@
 
 import Link from "next/link";
 import { motion } from "framer-motion";
+import { Check } from "lucide-react";
 import { BackgroundBeams } from "@/components/ui/background-beams";
 
-const TRUST = ["✓ Free to list", "✓ No setup fees", "✓ Cancel anytime", "✓ No commission"];
+const TRUST = ["Free to list", "No setup fees", "Cancel anytime", "No commission"];
 
 export function CTASection() {
   return (
@@ -70,8 +71,9 @@ export function CTASection() {
               whileInView={{ opacity: 1, scale: 1 }}
               viewport={{ once: true }}
               transition={{ delay: 0.5 + i * 0.07 }}
-              className="text-xs text-gray-500 bg-white/3 border border-white/8 px-3 py-1 rounded-full"
+              className="flex items-center gap-1.5 text-xs text-gray-500 bg-white/3 border border-white/8 px-3 py-1 rounded-full"
             >
+              <Check size={11} className="text-brand-green flex-shrink-0" strokeWidth={2.5} />
               {t}
             </motion.span>
           ))}
