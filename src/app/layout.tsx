@@ -1,4 +1,9 @@
-// Root layout required by Next.js. Full layout is in [locale]/layout.tsx.
+// Root layout — owns <html> and <body>. Locale-specific setup is in [locale]/layout.tsx.
+// suppressHydrationWarning prevents mismatches when the lang attribute is set client-side.
 export default function RootLayout({ children }: { children: React.ReactNode }) {
-  return children as React.ReactElement;
+  return (
+    <html suppressHydrationWarning>
+      <body suppressHydrationWarning>{children}</body>
+    </html>
+  );
 }
