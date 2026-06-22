@@ -27,9 +27,7 @@ export default function NotFound() {
   );
 
   return (
-    <html>
-      <body style={{ margin: 0 }}>
-        <div className="relative min-h-screen bg-[#0a0a0a] text-white overflow-hidden flex flex-col items-center justify-center px-4">
+    <div className="relative min-h-screen bg-[#0a0a0a] text-white overflow-hidden flex flex-col items-center justify-center px-4">
           {/* Background glow */}
           <div className="absolute inset-0 bg-[radial-gradient(ellipse_60%_50%_at_50%_60%,rgba(46,204,113,0.07),transparent)] pointer-events-none" />
 
@@ -121,8 +119,6 @@ export default function NotFound() {
             transition={{ delay: 0.8, duration: 0.8 }}
             className="absolute bottom-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-brand-green/40 to-transparent"
           />
-        </div>
-      </body>
-    </html>
+    </div>
   );
 }
