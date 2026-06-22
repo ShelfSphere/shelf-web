@@ -18,7 +18,7 @@ function FloatingProducts() {
         const left = 4 + (i * 8.1) % 96;
         const delay = (i * 1.3) % 8;
         const duration = 10 + (i * 1.7) % 8;
-        const size = 18 + (i * 3) % 14;
+        const size = Math.round((18 + (i * 3) % 14) * 1.2);
         const rotate = (i % 2 === 0 ? 1 : -1) * (15 + (i * 7) % 25);
         return (
           <motion.div
