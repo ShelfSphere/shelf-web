@@ -37,7 +37,9 @@ function FloatingProducts() {
               ease: "linear",
               times: [0, 0.1, 0.9, 1],
             }}
-          />
+          >
+            {emoji}
+          </motion.div>
         );
       })}
     </div>
