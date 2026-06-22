@@ -1,56 +1,62 @@
 "use client";
 
-import { HoverEffect } from "@/components/ui/card-hover-effect";
 import { motion } from "framer-motion";
+import { BentoGrid } from "@/components/ui/bento-grid";
+import { GlowingStarsBackground } from "@/components/ui/glowing-stars";
 
 const FEATURES = [
   {
     icon: "🗺️",
     title: "3D hall editor",
-    description:
-      "Drag-and-drop shelf placement inside an interactive Three.js scene. Green = available, Red = booked. Rotate, zoom, and click any shelf.",
+    description: "Drag-and-drop shelf placement in an interactive Three.js scene. Rotate, zoom, and click any shelf.",
+    className: "md:col-span-2 md:row-span-2",
+    highlight: true,
   },
   {
     icon: "💰",
     title: "Tier-based pricing",
-    description:
-      "Eye-level shelves command premium rates. Set price per day per shelf — bottom, middle, eye-level, or top — and let the market decide.",
+    description: "Eye-level shelves command premium rates. Set price per day per shelf.",
+    className: "",
   },
   {
     icon: "📅",
     title: "Date-range bookings",
-    description:
-      "Brands pick start and end dates. Overlapping bookings are blocked automatically. No double bookings, ever.",
+    description: "Overlap detection prevents double bookings automatically.",
+    className: "",
   },
   {
     icon: "🔐",
     title: "Google & email auth",
-    description:
-      "Sign up in seconds with Google or classic email/password. Separate roles and dashboards for supermarkets and brands.",
+    description: "Sign up with Google or email. Separate roles for each user type.",
+    className: "",
   },
   {
     icon: "📊",
     title: "Real-time availability",
-    description:
-      "Shelf status updates the moment a booking is confirmed. Always accurate across all dashboards.",
+    description: "Shelf status updates the moment a booking lands.",
+    className: "",
   },
   {
     icon: "🧾",
-    title: "Full booking history",
-    description:
-      "Audit trail for both sides — supermarkets track revenue; brands track campaigns and cancellations.",
+    title: "Booking history",
+    description: "Full audit trail for supermarkets and brands.",
+    className: "",
   },
 ];
 
 export function FeaturesSection() {
   return (
-    <section id="features" className="py-28 bg-[#0a0a0a] relative">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <section id="features" className="py-28 bg-[#0a0a0a] relative overflow-hidden">
+      {/* Stars background */}
+      <GlowingStarsBackground />
+
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          className="text-center mb-4"
+          transition={{ duration: 0.6 }}
+          className="text-center mb-16"
         >
           <p className="text-brand-green text-sm font-semibold uppercase tracking-widest mb-3">
             Features
@@ -58,15 +64,12 @@ export function FeaturesSection() {
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white">
             Everything you need
           </h2>
-          <p className="mt-4 text-gray-400 max-w-xl mx-auto">
+          <p className="mt-4 text-gray-500 max-w-xl mx-auto">
             Built for both sides of the shelf marketplace.
           </p>
         </motion.div>
 
-        <HoverEffect
-          items={FEATURES.map((f) => ({ ...f, icon: <span>{f.icon}</span> }))}
-          className="mt-8"
-        />
+        <BentoGrid items={FEATURES} />
       </div>
     </section>
   );

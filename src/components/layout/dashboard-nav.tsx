@@ -24,7 +24,7 @@ export function DashboardNav() {
   return (
     <nav className="bg-brand-navy text-white h-16 flex items-center px-4 sm:px-6 lg:px-8 gap-6">
       <Link href="/" className="flex items-center gap-2 mr-4">
-        <Image src="/logo.png" alt="Shelf" width={28} height={28} />
+        <Image src="/logo.svg" alt="Shelf" width={28} height={28} />
         <span className="font-bold text-lg">Shelf</span>
       </Link>
       <div className="flex-1 flex items-center gap-1">

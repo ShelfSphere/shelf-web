@@ -7,7 +7,7 @@ export const metadata: Metadata = {
   title: "Shelf — The Shelf Marketplace",
   description:
     "Connect supermarkets with product owners. List, discover, and book premium shelf space.",
-  icons: { icon: "/logo.png" },
+  icons: { icon: "/logo.svg" },
 };
 
 export default function RootLayout({

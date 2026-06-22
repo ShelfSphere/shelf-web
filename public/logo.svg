@@ -1,0 +1,98 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" fill="none">
+  <defs>
+    <radialGradient id="globeGrad" cx="50%" cy="35%" r="60%">
+      <stop offset="0%" stop-color="#1A3560"/>
+      <stop offset="100%" stop-color="#0F1F3D"/>
+    </radialGradient>
+    <radialGradient id="bottomGrad" cx="50%" cy="70%" r="60%">
+      <stop offset="0%" stop-color="#27AE60"/>
+      <stop offset="100%" stop-color="#1E8449"/>
+    </radialGradient>
+    <clipPath id="topHalf">
+      <rect x="0" y="0" width="120" height="62"/>
+    </clipPath>
+    <clipPath id="bottomHalf">
+      <rect x="0" y="58" width="120" height="62"/>
+    </clipPath>
+    <clipPath id="innerClip">
+      <ellipse cx="60" cy="60" rx="52" ry="52"/>
+    </clipPath>
+    <!-- Orange shelf clip -->
+    <clipPath id="orangeShelf">
+      <rect x="18" y="24" width="84" height="22"/>
+    </clipPath>
+    <!-- Green shelf clip -->
+    <clipPath id="greenShelf">
+      <rect x="18" y="46" width="84" height="22"/>
+    </clipPath>
+    <!-- Blue shelf clip -->
+    <clipPath id="blueShelf">
+      <rect x="18" y="66" width="84" height="22"/>
+    </clipPath>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="2" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="shadow">
+      <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#000" flood-opacity="0.3"/>
+    </filter>
+  </defs>
+
+  <!-- Outer shadow -->
+  <ellipse cx="62" cy="110" rx="38" ry="6" fill="#000" fill-opacity="0.15"/>
+
+  <!-- Globe top half (navy) -->
+  <ellipse cx="60" cy="60" rx="52" ry="52" fill="url(#globeGrad)" clip-path="url(#topHalf)"/>
+
+  <!-- Globe bottom half (green) -->
+  <ellipse cx="60" cy="60" rx="52" ry="52" fill="url(#bottomGrad)" clip-path="url(#bottomHalf)"/>
+
+  <!-- Globe grid lines -->
+  <ellipse cx="60" cy="60" rx="52" ry="52" fill="none" stroke="#ffffff" stroke-width="0.5" stroke-opacity="0.15" clip-path="url(#topHalf)"/>
+  <line x1="40" y1="8" x2="40" y2="62" stroke="#fff" stroke-width="0.5" stroke-opacity="0.12"/>
+  <line x1="60" y1="8" x2="60" y2="62" stroke="#fff" stroke-width="0.5" stroke-opacity="0.12"/>
+  <line x1="80" y1="8" x2="80" y2="62" stroke="#fff" stroke-width="0.5" stroke-opacity="0.12"/>
+  <ellipse cx="60" cy="38" rx="52" ry="14" fill="none" stroke="#fff" stroke-width="0.5" stroke-opacity="0.12" clip-path="url(#topHalf)"/>
+
+  <!-- Opening / inner frame (orange arc) -->
+  <path d="M 22 48 Q 60 20 98 48 L 98 76 Q 60 90 22 76 Z" fill="#0F1F3D" fill-opacity="0.85"/>
+  <path d="M 22 48 Q 60 20 98 48" fill="none" stroke="#F39C12" stroke-width="5" stroke-linecap="round"/>
+
+  <!-- Orange shelf floor -->
+  <rect x="22" y="48" width="76" height="4" rx="2" fill="#E67E22"/>
+
+  <!-- Orange bars (top shelf) -->
+  <rect x="30" y="36" width="10" height="12" rx="1.5" fill="#F39C12"/>
+  <rect x="44" y="30" width="10" height="18" rx="1.5" fill="#F39C12"/>
+  <rect x="58" y="33" width="10" height="15" rx="1.5" fill="#F39C12"/>
+  <rect x="72" y="27" width="10" height="21" rx="1.5" fill="#F39C12"/>
+
+  <!-- Green shelf floor -->
+  <rect x="22" y="68" width="76" height="4" rx="2" fill="#27AE60"/>
+
+  <!-- Green bars (middle shelf) -->
+  <rect x="28" y="58" width="9" height="10" rx="1.5" fill="#2ECC71"/>
+  <rect x="41" y="53" width="9" height="15" rx="1.5" fill="#2ECC71"/>
+  <rect x="54" y="56" width="9" height="12" rx="1.5" fill="#2ECC71"/>
+  <rect x="67" y="50" width="9" height="18" rx="1.5" fill="#2ECC71"/>
+  <rect x="80" y="54" width="9" height="14" rx="1.5" fill="#2ECC71"/>
+
+  <!-- Blue shelf floor -->
+  <rect x="22" y="86" width="76" height="4" rx="2" fill="#2471A3"/>
+
+  <!-- Blue bars (bottom shelf) -->
+  <rect x="30" y="77" width="9" height="9" rx="1.5" fill="#2980B9"/>
+  <rect x="43" y="72" width="9" height="14" rx="1.5" fill="#2980B9"/>
+  <rect x="56" y="75" width="9" height="11" rx="1.5" fill="#2980B9"/>
+  <rect x="69" y="70" width="9" height="16" rx="1.5" fill="#2980B9"/>
+  <rect x="82" y="74" width="9" height="12" rx="1.5" fill="#2980B9"/>
+
+  <!-- Orbit ring (back) -->
+  <ellipse cx="60" cy="60" rx="62" ry="16" fill="none" stroke="#7F8C8D" stroke-width="4" stroke-opacity="0.3" clip-path="url(#topHalf)"/>
+
+  <!-- Orbit ring (front white) -->
+  <ellipse cx="60" cy="60" rx="62" ry="16" fill="none" stroke="#ecf0f1" stroke-width="4" clip-path="url(#bottomHalf)"/>
+
+  <!-- Navy ring overlap on bottom -->
+  <ellipse cx="60" cy="60" rx="62" ry="16" fill="none" stroke="#1A3560" stroke-width="2.5" stroke-opacity="0.6" clip-path="url(#topHalf)"/>
+</svg>

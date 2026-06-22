@@ -59,7 +59,7 @@ export function FloatingNavbar() {
             )}
           >
             <Link href="/" className="flex items-center gap-2">
-              <Image src="/logo.png" alt="Shelf" width={28} height={28} />
+              <Image src="/logo.svg" alt="Shelf" width={28} height={28} />
               <span className="font-bold text-white text-sm">Shelf</span>
             </Link>
 
