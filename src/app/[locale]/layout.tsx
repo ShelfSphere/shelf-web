@@ -30,7 +30,7 @@ export default async function LocaleLayout({
   const messages = await getMessages();
 
   return (
-    <NextIntlClientProvider messages={messages}>
+    <NextIntlClientProvider locale={locale} messages={messages}>
       <Providers>
         {children}
         <Toaster richColors position="top-right" />
