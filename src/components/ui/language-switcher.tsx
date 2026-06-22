@@ -1,7 +1,7 @@
 "use client";
 
 import { useLocale } from "next-intl";
-import { useRouter, usePathname } from "next/navigation";
+import { useRouter, usePathname } from "@/i18n/navigation";
 import { useState, useRef, useEffect } from "react";
 import { Globe, ChevronDown, Check } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -23,7 +23,7 @@ const FULL_LABELS: Record<string, string> = {
 export function LanguageSwitcher() {
   const locale = useLocale();
   const router = useRouter();
-  const pathname = usePathname();
+  const pathname = usePathname(); // locale-stripped path from next-intl
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
@@ -38,14 +38,7 @@ export function LanguageSwitcher() {
   }, []);
 
   const switchLocale = (next: string) => {
-    // Swap the locale segment in the path
-    const segments = pathname.split("/");
-    if (routing.locales.includes(segments[1] as (typeof routing.locales)[number])) {
-      segments[1] = next;
-    } else {
-      segments.splice(1, 0, next);
-    }
-    router.push(segments.join("/") || "/");
+    router.replace(pathname, { locale: next });
     setOpen(false);
   };
 
@@ -53,7 +46,7 @@ export function LanguageSwitcher() {
     <div ref={ref} className="relative">
       <button
         onClick={() => setOpen((v) => !v)}
-        className="flex items-center gap-1 text-sm text-gray-300 hover:text-white px-2.5 py-1.5 rounded-full hover:bg-white/10 transition-colors"
+        className="flex items-center gap-1 text-sm text-gray-300 hover:text-white px-2.5 py-1.5 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 transition-colors"
       >
         <Globe size={14} className="flex-shrink-0" />
         <span className="font-medium">{LABELS[locale]}</span>
