@@ -7,8 +7,42 @@ import { useTranslations } from "next-intl";
 import { Spotlight } from "@/components/ui/spotlight";
 import { TextGenerateEffect } from "@/components/ui/text-generate-effect";
 import { MovingBorder } from "@/components/ui/moving-border";
-import { Meteors } from "@/components/ui/meteors";
 import { AnimatedCounter } from "@/components/ui/animated-counter";
+
+const PRODUCTS = ["🥛", "🍎", "🫙", "🧃", "🥫", "🍫", "🧀", "🥚", "🫐", "🍋", "🥕", "🧴"];
+
+function FloatingProducts() {
+  return (
+    <div className="absolute inset-0 overflow-hidden pointer-events-none">
+      {PRODUCTS.map((emoji, i) => {
+        const left = 4 + (i * 8.1) % 96;
+        const delay = (i * 1.3) % 8;
+        const duration = 10 + (i * 1.7) % 8;
+        const size = 18 + (i * 3) % 14;
+        const rotate = (i % 2 === 0 ? 1 : -1) * (15 + (i * 7) % 25);
+        return (
+          <motion.div
+            key={emoji + i}
+            className="absolute select-none"
+            style={{ left: `${left}%`, top: "-5%", fontSize: size, opacity: 0 }}
+            animate={{
+              y: ["0vh", "110vh"],
+              rotate: [0, rotate, -rotate, 0],
+              opacity: [0, 0.55, 0.55, 0],
+            }}
+            transition={{
+              duration,
+              delay,
+              repeat: Infinity,
+              ease: "linear",
+              times: [0, 0.1, 0.9, 1],
+            }}
+          />
+        );
+      })}
+    </div>
+  );
+}
 
 export function HeroSection() {
   const t = useTranslations("hero");
@@ -37,9 +71,7 @@ export function HeroSection() {
 
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_-20%,rgba(46,204,113,0.08),transparent)]" />
 
-      <div className="absolute inset-0 overflow-hidden">
-        <Meteors number={14} />
-      </div>
+      <FloatingProducts />
 
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col lg:flex-row items-center gap-16 py-20">
         {/* Left */}
