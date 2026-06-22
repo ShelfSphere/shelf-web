@@ -1,0 +1,190 @@
+{
+  "nav": {
+    "howItWorks": "How it works",
+    "features": "Features",
+    "pricing": "Pricing",
+    "signIn": "Sign in",
+    "getStarted": "Get started",
+    "dashboard": "Dashboard",
+    "signOut": "Sign out"
+  },
+  "hero": {
+    "badge": "Shelf marketplace — now live",
+    "headline": "Put your products on the right shelf",
+    "subheadline": "Supermarkets list their shelf space in 3D. Brands discover and book premium eye-level positions at transparent prices — no calls, no emails.",
+    "ctaBrand": "Book a shelf",
+    "ctaSupermarket": "List my shelves",
+    "stats": {
+      "supermarkets": "Supermarkets",
+      "listings": "Shelf listings",
+      "brands": "Brands"
+    }
+  },
+  "howItWorks": {
+    "label": "How it works",
+    "title": "From empty shelf to sold-out product",
+    "subtitle": "Three steps. Zero phone calls.",
+    "steps": [
+      {
+        "title": "Supermarkets map their halls",
+        "description": "Use our 3D hall editor to recreate your store layout. Define shelf sections with exact dimensions, positions, and tier-based daily pricing."
+      },
+      {
+        "title": "Available shelves go live",
+        "description": "Green-highlighted shelves signal real-time availability. The moment a booking is confirmed, the shelf instantly turns red across all views."
+      },
+      {
+        "title": "Brands discover & book",
+        "description": "Product owners filter by tier, price, and location, explore the 3D layout, then book a date range instantly — no back-and-forth needed."
+      }
+    ]
+  },
+  "features": {
+    "label": "Features",
+    "title": "Everything you need",
+    "subtitle": "Built for both sides of the shelf marketplace.",
+    "items": [
+      {
+        "title": "3D hall editor",
+        "description": "Drag-and-drop shelf placement in an interactive Three.js scene. Rotate, zoom, and click any shelf to manage it."
+      },
+      {
+        "title": "Tier-based pricing",
+        "description": "Eye-level shelves command premium rates. Set price per day per shelf."
+      },
+      {
+        "title": "Date-range bookings",
+        "description": "Overlap detection prevents double bookings automatically."
+      },
+      {
+        "title": "Google & email auth",
+        "description": "Sign up with Google or email. Separate roles for each user type."
+      },
+      {
+        "title": "Real-time availability",
+        "description": "Shelf status updates the moment a booking lands."
+      },
+      {
+        "title": "Booking history",
+        "description": "Full audit trail for supermarkets and brands."
+      }
+    ]
+  },
+  "pricing": {
+    "label": "Pricing",
+    "title": "Shelf pricing by tier",
+    "subtitle": "Each supermarket sets their own daily rate. These are typical starting prices across our network.",
+    "from": "from",
+    "perDay": "/day",
+    "mostPopular": "Most popular",
+    "note": "Prices set by individual supermarkets · Final rates may vary",
+    "tiers": [
+      {
+        "full": "Bottom shelf",
+        "description": "Floor level. Budget-friendly, great for large or heavy items."
+      },
+      {
+        "full": "Middle shelf",
+        "description": "Mid-height. Balanced visibility and price for growing brands."
+      },
+      {
+        "full": "Eye-level shelf",
+        "description": "Premium placement. Proven to drive the highest conversion rates."
+      },
+      {
+        "full": "Top shelf",
+        "description": "Above eye-level. Great for tall, aspirational or premium products."
+      }
+    ]
+  },
+  "testimonials": {
+    "label": "Testimonials",
+    "title": "Loved by supermarkets and brands",
+    "subtitle": "Join hundreds of businesses already using Shelf to grow.",
+    "items": [
+      {
+        "quote": "We listed our shelves in under an hour. The 3D editor made it easy — brands can actually visualize the space before booking.",
+        "name": "Maria Kowalski",
+        "title": "Store Manager, FreshMart"
+      },
+      {
+        "quote": "Eye-level bookings tripled our sales for that product line within the first month. The pricing transparency is a game changer.",
+        "name": "James Liu",
+        "title": "Brand Director, NutriCo"
+      },
+      {
+        "quote": "No more emailing back and forth with 12 store managers. I find the shelf, pick the dates, done. Shelf pays for itself in one campaign.",
+        "name": "Sofia Andersen",
+        "title": "Marketing Lead, SnackHouse"
+      },
+      {
+        "quote": "The booking system just works. Our revenue from shelf rentals went up 40% after switching from manual spreadsheets.",
+        "name": "David Okafor",
+        "title": "Operations Director, GreenGrocer"
+      },
+      {
+        "quote": "Finally a platform that thinks about supermarkets AND brands equally. The dashboard gives us everything we need.",
+        "name": "Priya Sharma",
+        "title": "Category Manager, SpiceRoute"
+      },
+      {
+        "quote": "We onboarded 3 new supermarket partners in a week. The 3D shelf view convinced them immediately — no long sales calls.",
+        "name": "Lucas Ferreira",
+        "title": "Partnerships, FoodBrand Co"
+      }
+    ]
+  },
+  "cta": {
+    "label": "Get started for free",
+    "title": "Ready to find your",
+    "titleHighlight": "perfect shelf?",
+    "subtitle": "Join supermarkets and product owners already using Shelf to grow their business. Setup takes under 5 minutes.",
+    "ctaBrand": "I'm a brand",
+    "ctaSupermarket": "I'm a supermarket",
+    "trust": {
+      "free": "Free to list",
+      "noSetup": "No setup fees",
+      "cancel": "Cancel anytime",
+      "noCommission": "No commission"
+    }
+  },
+  "footer": {
+    "tagline": "The marketplace connecting supermarkets with product owners for premium, transparent shelf placement.",
+    "product": "Product",
+    "company": "Company",
+    "getStarted": "Get started",
+    "signIn": "Sign in",
+    "copyright": "All rights reserved.",
+    "builtWith": "Built with",
+    "forCommunity": "for supermarkets and brands"
+  },
+  "auth": {
+    "signUp": {
+      "title": "Create an account",
+      "subtitle": "Join the Shelf marketplace",
+      "iAm": "I am a…",
+      "productOwner": "Product owner / Brand",
+      "supermarket": "Supermarket",
+      "fullName": "Full name",
+      "email": "Email",
+      "password": "Password",
+      "submit": "Create account",
+      "submitting": "Creating account…",
+      "haveAccount": "Already have an account?",
+      "signInLink": "Sign in",
+      "success": "Account created!",
+      "error": "Registration failed. Email may already be in use."
+    },
+    "signIn": {
+      "title": "Welcome back",
+      "subtitle": "Sign in to your Shelf account",
+      "email": "Email",
+      "password": "Password",
+      "submit": "Sign in",
+      "submitting": "Signing in…",
+      "noAccount": "Don't have an account?",
+      "signUpLink": "Get started",
+      "error": "Invalid email or password."
+    }
+  }
+}

@@ -5,24 +5,22 @@ import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import Image from "next/image";
 import { useSession, signOut } from "next-auth/react";
+import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
-
-interface NavItem {
-  label: string;
-  href: string;
-}
-
-const NAV_ITEMS: NavItem[] = [
-  { label: "How it works", href: "#how-it-works" },
-  { label: "Features", href: "#features" },
-  { label: "Pricing", href: "#pricing" },
-];
+import { LanguageSwitcher } from "@/components/ui/language-switcher";
 
 export function FloatingNavbar() {
   const { data: session } = useSession();
+  const t = useTranslations("nav");
   const [visible, setVisible] = useState(true);
   const [scrolled, setScrolled] = useState(false);
   const [lastScrollY, setLastScrollY] = useState(0);
+
+  const NAV_ITEMS = [
+    { label: t("howItWorks"), href: "#how-it-works" },
+    { label: t("features"), href: "#features" },
+    { label: t("pricing"), href: "#pricing" },
+  ];
 
   useEffect(() => {
     const onScroll = () => {
@@ -46,9 +44,7 @@ export function FloatingNavbar() {
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -20 }}
           transition={{ duration: 0.2 }}
-          className={cn(
-            "fixed top-4 inset-x-0 z-50 mx-auto max-w-2xl px-4",
-          )}
+          className="fixed top-4 inset-x-0 z-50 mx-auto max-w-2xl px-4"
         >
           <div
             className={cn(
@@ -76,28 +72,28 @@ export function FloatingNavbar() {
             </div>
 
             <div className="flex items-center gap-2">
+              <LanguageSwitcher />
+
               {session ? (
-                <>
-                  <Link
-                    href={dashboardHref}
-                    className="text-sm font-medium text-white px-3 py-1.5 rounded-full bg-brand-green hover:bg-brand-green-dark transition-colors"
-                  >
-                    Dashboard
-                  </Link>
-                </>
+                <Link
+                  href={dashboardHref}
+                  className="text-sm font-medium text-white px-3 py-1.5 rounded-full bg-brand-green hover:bg-brand-green-dark transition-colors"
+                >
+                  {t("dashboard")}
+                </Link>
               ) : (
                 <>
                   <Link
                     href="/sign-in"
                     className="text-sm text-gray-300 hover:text-white px-3 py-1.5 rounded-full hover:bg-white/10 transition-colors hidden sm:block"
                   >
-                    Sign in
+                    {t("signIn")}
                   </Link>
                   <Link
                     href="/sign-up"
                     className="text-sm font-semibold px-4 py-1.5 bg-brand-green text-white rounded-full hover:bg-brand-green-dark transition-colors"
                   >
-                    Get started
+                    {t("getStarted")}
                   </Link>
                 </>
               )}

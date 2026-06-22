@@ -1,0 +1,190 @@
+{
+  "nav": {
+    "howItWorks": "Ինչպես է աշխատում",
+    "features": "Հնարավորություններ",
+    "pricing": "Գներ",
+    "signIn": "Մուտք",
+    "getStarted": "Սկսել",
+    "dashboard": "Վահանակ",
+    "signOut": "Ելք"
+  },
+  "hero": {
+    "badge": "Դarakeeri shuka — ardem ka",
+    "headline": "Teladrek dzez apranqnery tchisht darakum",
+    "subheadline": "Supermarketnerě stexcum en 3D dahlichhi hatakaghtzner: Apranqanishnery gtnumev amragrum en premium dirzher — voch mi zvang, voch mi namakntutyun:",
+    "ctaBrand": "Amragrel darak",
+    "ctaSupermarket": "Avelacnel daraqner",
+    "stats": {
+      "supermarkets": "Supermarket",
+      "listings": "Darak",
+      "brands": "Apranqanish"
+    }
+  },
+  "howItWorks": {
+    "label": "Ինչпес е ashxatum",
+    "title": "Datarik darakits vacharvatz apranq",
+    "subtitle": "Yerek qayI: Voch mi zvang:",
+    "steps": [
+      {
+        "title": "Supermarketnerě stexcum en dahlichhi hatakagitz",
+        "description": "Ogtagortsel mer 3D xmbagiry dzez khanuti hatakagitze verastaghelou hamar: Sahmaneck daraghneri hatvatnery tchisht chaphsherov, dirzherov yev makardakayin or akan gnagoiatsamb:"
+      },
+      {
+        "title": "Hasaneli daragnery erpum en luysi vra",
+        "description": "Kanach daraghnerě tsuyts en ta hasaneliyutyunuh iravatikanin zhamanakum: Amragrmanny hasaratmanits heto daraghy andmijapes karmir e darnum:"
+      },
+      {
+        "title": "Apranqanishnery gtnum ev amragrumen",
+        "description": "Apranqi sranikatererě filtrum en yst makardaki, gnin ev tarabashkhvadzutyants, usumnasirum 3D hatakagitze, apa amragrumen amsativeri enkakuyth andmijapes:"
+      }
+    ]
+  },
+  "features": {
+    "label": "Հnаравоrantуunner",
+    "title": "Amen inch, inch dzez harkavor e",
+    "subtitle": "Stexcvac sharkayi erkhu koxmeri hamar:",
+    "items": [
+      {
+        "title": "3D dahlichhi xmbagir",
+        "description": "Taraber daragnery interaqtiv Three.js tesarumin: Pttrek, mozatrek u klkatrek cankacac daraki vra karavelouu hamar:"
+      },
+      {
+        "title": "Makardakayin gnagoiatsum",
+        "description": "Acki makardaki daragnery aveli branakan en: Sahmaner or akan gin amen daraki hamar:"
+      },
+      {
+        "title": "Amragrmum yst amsativeri",
+        "description": "Hamakargn inqnaberabar karum e krknapatak amragrmume:"
+      },
+      {
+        "title": "Mutq Google-ov ev email-ov",
+        "description": "Grastvek Google-ov kam email-ov: Tarbher derer yuraqanchyur ogtatir tesaki hamar:"
+      },
+      {
+        "title": "Hasaneliyutyun iravunq zhamanakum",
+        "description": "Daraki kargavichaky tazarum e amragrman pahit:"
+      },
+      {
+        "title": "Amragrmerneri patmutіyun",
+        "description": "Lriv patmutyun supermarketner ev apranqanishner hamar:"
+      }
+    ]
+  },
+  "pricing": {
+    "label": "Գner",
+    "title": "Daragneri gnerě yst makardaki",
+    "subtitle": "Yuraqanchyur supermarketě sahmanumye or akan gnin: Sranchq tsankachayin sksnayin gnern en mеr tsankum:",
+    "from": "Sksac",
+    "perDay": "/or",
+    "mostPopular": "Ամenaserir",
+    "note": "Gnery sahmanvum en ankum supermarketner koxmic · Vernjakan arjeky karogh e tarbervil",
+    "tiers": [
+      {
+        "full": "Stornin darak",
+        "description": "Hataki makardat: Byujhetayin, hianali e mec kam dzanr apranqneri hamar:"
+      },
+      {
+        "full": "Midjin darak",
+        "description": "Midjin baranrut: Havasarakshrutyun tesaneliyutyun ev gni mijev:"
+      },
+      {
+        "full": "Acki makardaki darak",
+        "description": "Premium tараber: Apahovjum e barcragoyn konversia:"
+      },
+      {
+        "full": "Vernin darak",
+        "description": "Acki makardakic ver: Hianali e bardz, aspirational apranqneri hamar:"
+      }
+    ]
+  },
+  "testimonials": {
+    "label": "Կardziqner",
+    "title": "Sirvac supermarketner ev apranqanishner koxmic",
+    "subtitle": "Miacek harуravors enketairutіunnerin, vorong ardem ogtagorcum en Shelf-ě:",
+    "items": [
+      {
+        "quote": "Menk avelacrecink mer daragnery mek jamits pakass zhamanak. 3D xmbagiry hakasuts — apranqanishnery karogh en patkeracnel taracerum amragrmumits arach:",
+        "name": "Maria Kowalski",
+        "title": "Khanuti Karavarchuhі, FreshMart"
+      },
+      {
+        "quote": "Acki makardaki amragrmumnery erakapat areci mer vacharqy aradjin ambsvan yntackum: Thaghanchik gnagoiatsoumě hekasharutyun e:",
+        "name": "James Liu",
+        "title": "Apranqi Tarber, NutriCo"
+      },
+      {
+        "quote": "Ayling chi namakanutyun 12 karavarchner het: Gti daraky, entrecy amsativery — patrastel e:",
+        "name": "Sofia Andersen",
+        "title": "Marketing Karavarchuhі, SnackHouse"
+      },
+      {
+        "quote": "Amragrman hamakargn payarakapes anum e: Mer ekamut daragneri vacharutyunits avelarel e 40%:",
+        "name": "David Okafor",
+        "title": "Gorcut Karavarich, GreenGrocer"
+      },
+      {
+        "quote": "Verjabes platforma, vor mtatsum e ev supermarketner ev apranqanishner masin: Vahanaky ameně tatalis e:",
+        "name": "Priya Sharma",
+        "title": "Kategorial Menedjer, SpiceRoute"
+      },
+      {
+        "quote": "Menk ner gravel enk 3 nor supermarket-gortcunker mek shabatanyakum: 3D tesqy andmijapes hamazoghets nranc:",
+        "name": "Lucas Ferreira",
+        "title": "Gortcunqner, FoodBrand Co"
+      }
+    ]
+  },
+  "cta": {
+    "label": "Սksel anvechar",
+    "title": "Patrastel e gtnelu dzez",
+    "titleHighlight": "kataryal daraky?",
+    "subtitle": "Miacek supermarketnerin ev apranqanishnerin, vorong ardem ogtagorcum en Shelf-ě: Grastvumě 5 ropek kes kteva:",
+    "ctaBrand": "Yes apranqanish em",
+    "ctaSupermarket": "Yes supermarket em",
+    "trust": {
+      "free": "Anvchar avelasum",
+      "noSetup": "Karavorum chi nvacvi",
+      "cancel": "Cankacac pahit chelyal",
+      "noCommission": "Andz mijnorvachary"
+    }
+  },
+  "footer": {
+    "tagline": "Platforma, vor kapu em supermarketnery apranqi sranikaterner het premium, thaghanchik daratsman hamar:",
+    "product": "Ardyunq",
+    "company": "Ynkanutyun",
+    "getStarted": "Skskel",
+    "signIn": "Mutq",
+    "copyright": "Bolor iravunqnery patshpanvac en:",
+    "builtWith": "Stexcvac",
+    "forCommunity": "supermarketneuri ev apranqanisheri hamar"
+  },
+  "auth": {
+    "signUp": {
+      "title": "Stexcel heshiv",
+      "subtitle": "Miacek Shelf sharkayin",
+      "iAm": "Yes em…",
+      "productOwner": "Apranqi srepanatar / Apranqanish",
+      "supermarket": "Supermarket",
+      "fullName": "Lriv anvanutyun",
+      "email": "Elekronain hascve",
+      "password": "Banalekhazhn",
+      "submit": "Stexcel heshiv",
+      "submitting": "Heshivi stexcum…",
+      "haveAccount": "Arjunq heshiv unek?",
+      "signInLink": "Mutq",
+      "success": "Heshivě stexcvel e!",
+      "error": "Grastvumě chi hajhogvel: Email-ě karogh e arjunqs ogtagortzvel lini:"
+    },
+    "signIn": {
+      "title": "Bari verat",
+      "subtitle": "Mutq dzez Shelf heshiv",
+      "email": "Elekronain hascve",
+      "password": "Banalekhazhn",
+      "submit": "Mutq",
+      "submitting": "Mutq…",
+      "noAccount": "Heshiv chka?",
+      "signUpLink": "Grastvek",
+      "error": "Skharm email kam banalekhazhn:"
+    }
+  }
+}

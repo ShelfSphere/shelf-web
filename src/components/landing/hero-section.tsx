@@ -3,19 +3,22 @@
 import Link from "next/link";
 import Image from "next/image";
 import { motion } from "framer-motion";
+import { useTranslations } from "next-intl";
 import { Spotlight } from "@/components/ui/spotlight";
 import { TextGenerateEffect } from "@/components/ui/text-generate-effect";
 import { MovingBorder } from "@/components/ui/moving-border";
 import { Meteors } from "@/components/ui/meteors";
 import { AnimatedCounter } from "@/components/ui/animated-counter";
 
-const STATS = [
-  { target: 500, suffix: "+", label: "Supermarkets" },
-  { target: 12000, suffix: "+", label: "Shelf listings", prefix: "" },
-  { target: 2000, suffix: "+", label: "Brands" },
-];
-
 export function HeroSection() {
+  const t = useTranslations("hero");
+
+  const STATS = [
+    { target: 500, suffix: "+", label: t("stats.supermarkets") },
+    { target: 12000, suffix: "+", label: t("stats.listings") },
+    { target: 2000, suffix: "+", label: t("stats.brands") },
+  ];
+
   return (
     <section className="relative min-h-screen flex items-center justify-center bg-[#0a0a0a] overflow-hidden pt-20">
       <Spotlight className="-top-40 left-0 md:left-60 md:-top-20" fill="white" />
@@ -32,7 +35,6 @@ export function HeroSection() {
         }}
       />
 
-      {/* Radial fade center */}
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_-20%,rgba(46,204,113,0.08),transparent)]" />
 
       <div className="absolute inset-0 overflow-hidden">
@@ -49,11 +51,11 @@ export function HeroSection() {
             className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-brand-green/30 bg-brand-green/10 text-brand-green text-xs font-semibold uppercase tracking-widest mb-6"
           >
             <span className="w-1.5 h-1.5 rounded-full bg-brand-green animate-pulse inline-block" />
-            Shelf marketplace — now live
+            {t("badge")}
           </motion.div>
 
           <TextGenerateEffect
-            words="Put your products on the right shelf"
+            words={t("headline")}
             className="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl text-white leading-tight"
             duration={0.5}
           />
@@ -64,8 +66,7 @@ export function HeroSection() {
             transition={{ delay: 0.8, duration: 0.6 }}
             className="mt-6 text-lg text-gray-400 max-w-xl mx-auto lg:mx-0 leading-relaxed"
           >
-            Supermarkets list their shelf space in 3D. Brands discover and book
-            premium eye-level positions at transparent prices — no calls, no emails.
+            {t("subheadline")}
           </motion.p>
 
           <motion.div
@@ -82,13 +83,13 @@ export function HeroSection() {
               className="px-8 py-3 text-sm font-semibold text-white"
               duration={3000}
             >
-              Book a shelf →
+              {t("ctaBrand")} →
             </MovingBorder>
             <Link
               href="/sign-up?role=SUPERMARKET"
               className="px-8 py-3 text-sm font-semibold text-gray-300 rounded-full border border-white/10 hover:border-white/30 hover:text-white transition-all backdrop-blur-sm text-center"
             >
-              List your shelves
+              {t("ctaSupermarket")}
             </Link>
           </motion.div>
 
@@ -131,7 +132,6 @@ export function HeroSection() {
               priority
             />
           </motion.div>
-          {/* Orbiting ping */}
           <motion.div
             animate={{ rotate: 360 }}
             transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
@@ -142,7 +142,7 @@ export function HeroSection() {
         </motion.div>
       </div>
 
-      {/* Bottom scroll indicator */}
+      {/* Scroll indicator */}
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
@@ -156,8 +156,6 @@ export function HeroSection() {
           className="w-px h-8 bg-gradient-to-b from-gray-600 to-transparent"
         />
       </motion.div>
-
-      <div className="absolute bottom-0 inset-x-0 h-32 bg-gradient-to-t from-[#0a0a0a] to-transparent" />
     </section>
   );
 }

@@ -2,64 +2,30 @@
 
 import { useRef } from "react";
 import { motion, useScroll, useTransform } from "framer-motion";
+import { useTranslations } from "next-intl";
 import { Store, Radio, ShoppingBag } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
-interface Step {
-  number: string;
-  icon: LucideIcon;
-  title: string;
-  description: string;
-  color: string;
-  border: string;
-  iconBg: string;
-  iconColor: string;
-  dot: string;
-}
-
-const STEPS: Step[] = [
-  {
-    number: "01",
-    icon: Store,
-    title: "Supermarkets map their halls",
-    description:
-      "Use our 3D hall editor to recreate your store layout. Define shelf sections with exact dimensions, positions, and tier-based daily pricing.",
-    color: "from-blue-500/12 to-transparent",
-    border: "border-blue-500/20",
-    iconBg: "bg-blue-500/15",
-    iconColor: "text-blue-400",
-    dot: "bg-blue-400",
-  },
-  {
-    number: "02",
-    icon: Radio,
-    title: "Available shelves go live",
-    description:
-      "Green-highlighted shelves signal real-time availability. The moment a booking is confirmed, the shelf instantly turns red across all views.",
-    color: "from-brand-green/12 to-transparent",
-    border: "border-brand-green/20",
-    iconBg: "bg-brand-green/15",
-    iconColor: "text-brand-green",
-    dot: "bg-brand-green",
-  },
-  {
-    number: "03",
-    icon: ShoppingBag,
-    title: "Brands discover & book",
-    description:
-      "Product owners filter by tier, price, and location, explore the 3D layout, then book a date range instantly — no back-and-forth needed.",
-    color: "from-orange-500/12 to-transparent",
-    border: "border-orange-500/20",
-    iconBg: "bg-orange-500/15",
-    iconColor: "text-orange-400",
-    dot: "bg-orange-400",
-  },
+const STEP_ICONS: LucideIcon[] = [Store, Radio, ShoppingBag];
+const STEP_STYLES = [
+  { color: "from-blue-500/12 to-transparent", border: "border-blue-500/20", iconBg: "bg-blue-500/15", iconColor: "text-blue-400", dot: "bg-blue-400" },
+  { color: "from-brand-green/12 to-transparent", border: "border-brand-green/20", iconBg: "bg-brand-green/15", iconColor: "text-brand-green", dot: "bg-brand-green" },
+  { color: "from-orange-500/12 to-transparent", border: "border-orange-500/20", iconBg: "bg-orange-500/15", iconColor: "text-orange-400", dot: "bg-orange-400" },
 ];
 
 export function HowItWorks() {
+  const t = useTranslations("howItWorks");
   const ref = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll({ target: ref, offset: ["start end", "end start"] });
   const lineHeight = useTransform(scrollYProgress, [0, 0.8], ["0%", "100%"]);
+
+  const steps = [0, 1, 2].map((i) => ({
+    number: String(i + 1).padStart(2, "0"),
+    title: t(`steps.${i}.title`),
+    description: t(`steps.${i}.description`),
+    icon: STEP_ICONS[i],
+    ...STEP_STYLES[i],
+  }));
 
   return (
     <section id="how-it-works" ref={ref} className="py-28 bg-[#0a0a0a] relative overflow-hidden">
@@ -75,16 +41,15 @@ export function HowItWorks() {
           className="text-center mb-20"
         >
           <p className="text-brand-green text-sm font-semibold uppercase tracking-widest mb-3">
-            How it works
+            {t("label")}
           </p>
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white">
-            From empty shelf to sold-out product
+            {t("title")}
           </h2>
-          <p className="mt-4 text-gray-500 max-w-xl mx-auto">Three steps. Zero phone calls.</p>
+          <p className="mt-4 text-gray-500 max-w-xl mx-auto">{t("subtitle")}</p>
         </motion.div>
 
         <div className="relative max-w-3xl mx-auto">
-          {/* Scroll-driven vertical timeline line */}
           <div className="absolute left-8 top-0 bottom-0 w-px bg-white/5">
             <motion.div
               className="w-full bg-gradient-to-b from-blue-500 via-brand-green to-orange-500"
@@ -93,18 +58,17 @@ export function HowItWorks() {
           </div>
 
           <div className="space-y-8">
-            {STEPS.map((step, i) => {
+            {steps.map((step, i) => {
               const Icon = step.icon;
               return (
                 <motion.div
-                  key={step.title}
+                  key={step.number}
                   initial={{ opacity: 0, x: -40 }}
                   whileInView={{ opacity: 1, x: 0 }}
                   viewport={{ once: true, margin: "-80px" }}
                   transition={{ delay: i * 0.15, duration: 0.6, type: "spring", stiffness: 80 }}
                   className="relative flex gap-8"
                 >
-                  {/* Timeline dot */}
                   <div className="relative flex-shrink-0 w-16 flex flex-col items-center">
                     <motion.div
                       initial={{ scale: 0 }}
@@ -115,13 +79,11 @@ export function HowItWorks() {
                     />
                   </div>
 
-                  {/* Card */}
                   <motion.div
                     whileHover={{ x: 6, transition: { duration: 0.2 } }}
-                    className={`flex-1 rounded-2xl border ${step.border} bg-gradient-to-br ${step.color} p-7 group`}
+                    className={`flex-1 rounded-2xl border ${step.border} bg-gradient-to-br ${step.color} p-7`}
                   >
                     <div className="flex items-start gap-4">
-                      {/* Icon badge */}
                       <div className={`w-11 h-11 rounded-xl ${step.iconBg} flex items-center justify-center flex-shrink-0`}>
                         <Icon size={20} className={step.iconColor} strokeWidth={1.75} />
                       </div>
