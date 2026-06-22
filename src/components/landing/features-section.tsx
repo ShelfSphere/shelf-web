@@ -1,66 +1,72 @@
+"use client";
+
+import { HoverEffect } from "@/components/ui/card-hover-effect";
+import { motion } from "framer-motion";
+
 const FEATURES = [
   {
     icon: "🗺️",
     title: "3D hall editor",
     description:
-      "Drag-and-drop shelf placement inside an interactive 3D model of your store. Green = available.",
+      "Drag-and-drop shelf placement inside an interactive Three.js scene. Green = available, Red = booked. Rotate, zoom, and click any shelf.",
   },
   {
     icon: "💰",
     title: "Tier-based pricing",
     description:
-      "Eye-level shelves command premium rates. Set price per day per shelf and let the market decide.",
+      "Eye-level shelves command premium rates. Set price per day per shelf — bottom, middle, eye-level, or top — and let the market decide.",
   },
   {
     icon: "📅",
-    title: "Date-based bookings",
+    title: "Date-range bookings",
     description:
-      "Brands pick start and end dates. Conflicts are prevented automatically — no double bookings.",
+      "Brands pick start and end dates. Overlapping bookings are blocked automatically. No double bookings, ever.",
   },
   {
     icon: "🔐",
     title: "Google & email auth",
     description:
-      "Sign up in seconds with Google or classic email/password. Separate roles for supermarkets and brands.",
+      "Sign up in seconds with Google or classic email/password. Separate roles and dashboards for supermarkets and brands.",
   },
   {
     icon: "📊",
     title: "Real-time availability",
     description:
-      "Shelves update the moment a booking is confirmed. Always accurate, always up to date.",
+      "Shelf status updates the moment a booking is confirmed. Always accurate across all dashboards.",
   },
   {
     icon: "🧾",
-    title: "Booking history",
+    title: "Full booking history",
     description:
-      "Full audit trail for both sides — supermarkets see who booked what; brands track their campaigns.",
+      "Audit trail for both sides — supermarkets track revenue; brands track campaigns and cancellations.",
   },
 ];
 
 export function FeaturesSection() {
   return (
-    <section id="features" className="py-20 bg-white">
+    <section id="features" className="py-28 bg-[#0a0a0a] relative">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-14">
-          <h2 className="text-3xl sm:text-4xl font-bold text-brand-navy">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          className="text-center mb-4"
+        >
+          <p className="text-brand-green text-sm font-semibold uppercase tracking-widest mb-3">
+            Features
+          </p>
+          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white">
             Everything you need
           </h2>
-          <p className="mt-3 text-gray-500 max-w-xl mx-auto">
+          <p className="mt-4 text-gray-400 max-w-xl mx-auto">
             Built for both sides of the shelf marketplace.
           </p>
-        </div>
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
-          {FEATURES.map((f) => (
-            <div
-              key={f.title}
-              className="rounded-2xl border border-gray-100 p-6 hover:shadow-md transition-shadow"
-            >
-              <div className="text-3xl mb-3">{f.icon}</div>
-              <h3 className="font-semibold text-brand-navy text-base mb-2">{f.title}</h3>
-              <p className="text-sm text-gray-500 leading-relaxed">{f.description}</p>
-            </div>
-          ))}
-        </div>
+        </motion.div>
+
+        <HoverEffect
+          items={FEATURES.map((f) => ({ ...f, icon: <span>{f.icon}</span> }))}
+          className="mt-8"
+        />
       </div>
     </section>
   );
