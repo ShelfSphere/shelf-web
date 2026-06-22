@@ -9,9 +9,22 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import Link from "next/link";
 import { toast } from "sonner";
+import { useTranslations } from "next-intl";
 import { api } from "@/lib/api";
 import { GoogleButton } from "@/components/auth/google-button";
 import { Divider } from "@/components/ui/divider";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Form, FormControl, FormField, FormItem, FormMessage } from "@/components/ui/form";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Loader2 } from "lucide-react";
 import type { UserRole } from "@/types";
 
 const schema = z.object({
@@ -25,14 +38,11 @@ type FormData = z.infer<typeof schema>;
 function SignUpForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const t = useTranslations("auth.signUp");
   const defaultRole = (searchParams.get("role") as UserRole) || "PRODUCT_OWNER";
   const [loading, setLoading] = useState(false);
 
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useForm<FormData>({
+  const form = useForm<FormData>({
     resolver: zodResolver(schema),
     defaultValues: { role: defaultRole },
   });
@@ -47,10 +57,10 @@ function SignUpForm() {
         redirect: false,
       });
       if (res?.error) throw new Error("Auto sign-in failed");
-      toast.success("Account created!");
+      toast.success(t("success"));
       router.push("/dashboard");
     } catch {
-      toast.error("Registration failed. Email may already be in use.");
+      toast.error(t("error"));
     } finally {
       setLoading(false);
     }
@@ -58,66 +68,95 @@ function SignUpForm() {
 
   return (
     <>
-      <h1 className="text-2xl font-bold text-brand-navy mb-1">Create an account</h1>
-      <p className="text-sm text-gray-500 mb-6">Join the Shelf marketplace</p>
+      <h1 className="text-2xl font-bold text-brand-navy mb-1">{t("title")}</h1>
+      <p className="text-sm text-muted-foreground mb-6">{t("subtitle")}</p>
 
       <GoogleButton label="Sign up with Google" />
       <Divider />
 
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">I am a…</label>
-          <select
-            {...register("role")}
-            className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-navy/20 focus:border-brand-navy"
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+          <FormField
+            control={form.control}
+            name="role"
+            render={({ field }) => (
+              <FormItem>
+                <Label>{t("iAm")}</Label>
+                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectItem value="PRODUCT_OWNER">{t("productOwner")}</SelectItem>
+                    <SelectItem value="SUPERMARKET">{t("supermarket")}</SelectItem>
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="name"
+            render={({ field }) => (
+              <FormItem>
+                <Label>{t("fullName")}</Label>
+                <FormControl>
+                  <Input placeholder="Jane Smith" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="email"
+            render={({ field }) => (
+              <FormItem>
+                <Label>{t("email")}</Label>
+                <FormControl>
+                  <Input type="email" placeholder="you@example.com" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="password"
+            render={({ field }) => (
+              <FormItem>
+                <Label>{t("password")}</Label>
+                <FormControl>
+                  <Input type="password" placeholder="••••••••" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <Button
+            type="submit"
+            disabled={loading}
+            className="w-full bg-brand-navy hover:bg-brand-navy-light"
           >
-            <option value="PRODUCT_OWNER">Product owner / Brand</option>
-            <option value="SUPERMARKET">Supermarket</option>
-          </select>
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Full name</label>
-          <input
-            type="text"
-            {...register("name")}
-            className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-navy/20 focus:border-brand-navy transition"
-            placeholder="Jane Smith"
-          />
-          {errors.name && <p className="text-red-500 text-xs mt-1">{errors.name.message}</p>}
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
-          <input
-            type="email"
-            {...register("email")}
-            className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-navy/20 focus:border-brand-navy transition"
-            placeholder="you@example.com"
-          />
-          {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email.message}</p>}
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
-          <input
-            type="password"
-            {...register("password")}
-            className="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-navy/20 focus:border-brand-navy transition"
-            placeholder="••••••••"
-          />
-          {errors.password && <p className="text-red-500 text-xs mt-1">{errors.password.message}</p>}
-        </div>
-        <button
-          type="submit"
-          disabled={loading}
-          className="w-full py-2.5 bg-brand-navy text-white font-semibold rounded-lg hover:bg-brand-navy-light transition-colors disabled:opacity-60"
-        >
-          {loading ? "Creating account…" : "Create account"}
-        </button>
-      </form>
+            {loading ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                {t("submitting")}
+              </>
+            ) : (
+              t("submit")
+            )}
+          </Button>
+        </form>
+      </Form>
 
-      <p className="text-center text-sm text-gray-500 mt-6">
-        Already have an account?{" "}
+      <p className="text-center text-sm text-muted-foreground mt-6">
+        {t("haveAccount")}{" "}
         <Link href="/sign-in" className="text-brand-green font-medium hover:underline">
-          Sign in
+          {t("signInLink")}
         </Link>
       </p>
     </>
