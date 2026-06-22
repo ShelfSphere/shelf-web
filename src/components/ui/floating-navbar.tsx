@@ -7,7 +7,6 @@ import Image from "next/image";
 import { useSession, signOut } from "next-auth/react";
 import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
-import { LanguageSwitcher } from "@/components/ui/language-switcher";
 
 export function FloatingNavbar() {
   const { data: session } = useSession();
@@ -72,8 +71,6 @@ export function FloatingNavbar() {
             </div>
 
             <div className="flex items-center gap-2">
-              <LanguageSwitcher />
-
               {session ? (
                 <Link
                   href={dashboardHref}
