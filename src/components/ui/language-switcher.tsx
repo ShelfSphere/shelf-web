@@ -1,18 +1,14 @@
 "use client";
 
 import { useLocale } from "next-intl";
-import { useRouter, usePathname } from "@/i18n/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { useState, useRef, useEffect } from "react";
 import { Globe, ChevronDown, Check } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { routing } from "@/i18n/routing";
 
-const LABELS: Record<string, string> = {
-  en: "EN",
-  ru: "RU",
-  hy: "HY",
-};
+const LABELS: Record<string, string> = { en: "EN", ru: "RU", hy: "HY" };
 
 const FULL_LABELS: Record<string, string> = {
   en: "English",
@@ -23,22 +19,35 @@ const FULL_LABELS: Record<string, string> = {
 export function LanguageSwitcher() {
   const locale = useLocale();
   const router = useRouter();
-  const pathname = usePathname(); // locale-stripped path from next-intl
+  const pathname = usePathname(); // full path e.g. "/ru/dashboard" or "/"
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const handler = (e: MouseEvent) => {
-      if (ref.current && !ref.current.contains(e.target as Node)) {
-        setOpen(false);
-      }
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
     };
     document.addEventListener("mousedown", handler);
     return () => document.removeEventListener("mousedown", handler);
   }, []);
 
   const switchLocale = (next: string) => {
-    router.replace(pathname, { locale: next });
+    if (next === locale) { setOpen(false); return; }
+
+    // Strip any existing locale prefix from the current path
+    let base = pathname;
+    for (const loc of routing.locales) {
+      if (pathname === `/${loc}`) { base = "/"; break; }
+      if (pathname.startsWith(`/${loc}/`)) { base = pathname.slice(loc.length + 1); break; }
+    }
+
+    // Build new path — default locale (en) gets no prefix with as-needed
+    const newPath =
+      next === routing.defaultLocale
+        ? base || "/"
+        : `/${next}${base === "/" ? "" : base}`;
+
+    router.push(newPath);
     setOpen(false);
   };
 
@@ -46,14 +55,11 @@ export function LanguageSwitcher() {
     <div ref={ref} className="relative">
       <button
         onClick={() => setOpen((v) => !v)}
-        className="flex items-center gap-1 text-sm text-gray-300 hover:text-white px-2.5 py-1.5 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 transition-colors"
+        className="flex items-center gap-1.5 text-sm text-gray-300 hover:text-white px-3 py-1.5 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 transition-colors backdrop-blur-sm"
       >
-        <Globe size={14} className="flex-shrink-0" />
-        <span className="font-medium">{LABELS[locale]}</span>
-        <ChevronDown
-          size={12}
-          className={cn("transition-transform duration-200", open && "rotate-180")}
-        />
+        <Globe size={13} className="flex-shrink-0" />
+        <span className="font-medium tracking-wide">{LABELS[locale]}</span>
+        <ChevronDown size={11} className={cn("transition-transform duration-200", open && "rotate-180")} />
       </button>
 
       <AnimatePresence>
@@ -77,7 +83,7 @@ export function LanguageSwitcher() {
                 )}
               >
                 <span>{FULL_LABELS[loc]}</span>
-                {loc === locale && <Check size={13} className="text-brand-green" />}
+                {loc === locale && <Check size={12} className="text-brand-green" />}
               </button>
             ))}
           </motion.div>
