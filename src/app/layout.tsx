@@ -1,16 +1,9 @@
 import type { Metadata } from "next";
-import { cookies } from "next/headers";
 import { NextIntlClientProvider } from "next-intl";
+import { getLocale, getMessages } from "next-intl/server";
 import { Providers } from "@/components/providers";
 import { Toaster } from "sonner";
 import "./globals.css";
-import enMessages from "../../messages/en.json";
-import ruMessages from "../../messages/ru.json";
-import hyMessages from "../../messages/hy.json";
-
-const MESSAGES = { en: enMessages, ru: ruMessages, hy: hyMessages };
-const LOCALES = ["en", "ru", "hy"] as const;
-type Locale = (typeof LOCALES)[number];
 
 export const metadata: Metadata = {
   title: "Shelf — The Shelf Marketplace",
@@ -20,16 +13,13 @@ export const metadata: Metadata = {
 };
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
-  const cookieStore = await cookies();
-  const lang = cookieStore.get("lang")?.value ?? "en";
-  const locale: Locale = (LOCALES as readonly string[]).includes(lang)
-    ? (lang as Locale)
-    : "en";
+  const locale = await getLocale();
+  const messages = await getMessages();
 
   return (
     <html suppressHydrationWarning>
       <body suppressHydrationWarning>
-        <NextIntlClientProvider locale={locale} messages={MESSAGES[locale]}>
+        <NextIntlClientProvider locale={locale} messages={messages}>
           <Providers>
             {children}
             <Toaster richColors position="top-right" />
