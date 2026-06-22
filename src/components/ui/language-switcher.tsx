@@ -47,8 +47,8 @@ export function LanguageSwitcher() {
         ? base || "/"
         : `/${next}${base === "/" ? "" : base}`;
 
-    router.push(newPath);
-    setOpen(false);
+    // Hard navigation so the server re-renders the layout with the new locale's messages
+    window.location.href = newPath;
   };
 
   return (
