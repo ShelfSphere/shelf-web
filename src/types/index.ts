@@ -41,6 +41,7 @@ export interface Shelf {
   height: number;
   tier: ShelfTier;
   levels: number;
+  rotation?: number;
   pricePerDay: number;
   isAvailable: boolean;
 }

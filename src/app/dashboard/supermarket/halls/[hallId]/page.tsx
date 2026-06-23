@@ -78,33 +78,42 @@ export default function HallEditorPage() {
   const startPlacement = () => {
     setSheetOpen(false);
     setPlacementMode(true);
-    toast.info("Click on the floor to place the stand", { duration: 4000 });
+    toast.info("Click & drag on the floor to fill a row with stands", { duration: 5000 });
   };
 
-  const handleFloorClick = async (x: number, z: number) => {
-    if (!placementMode || !hall) return;
+  const handleLineDrop = async (positions: { x: number; z: number }[], rotation: number) => {
+    if (!hall) return;
     setSaving(true);
     try {
       const h = standHeight(selectedLevels);
-      const res = await api.post<Shelf>("/shelves", {
-        hallId: hall.id,
-        name: form.name,
-        tier: "EYE_LEVEL",
-        levels: selectedLevels,
-        pricePerDay: form.pricePerDay,
-        width: form.width,
-        height: h,
-        depth: form.depth,
-        positionX: x,
-        positionY: 0,
-        positionZ: z,
-        isAvailable: true,
-      });
-      setHall(prev => prev ? { ...prev, shelves: [...prev.shelves, res.data] } : prev);
-      toast.success("Stand placed!");
+      const results = await Promise.all(
+        positions.map(({ x, z }) =>
+          api.post<Shelf>("/shelves", {
+            hallId: hall.id,
+            name: form.name,
+            tier: "EYE_LEVEL",
+            levels: selectedLevels,
+            rotation,
+            pricePerDay: form.pricePerDay,
+            width: form.width,
+            height: h,
+            depth: form.depth,
+            positionX: x,
+            positionY: 0,
+            positionZ: z,
+            isAvailable: true,
+          })
+        )
+      );
+      setHall(prev => prev
+        ? { ...prev, shelves: [...prev.shelves, ...results.map(r => r.data)] }
+        : prev
+      );
+      const n = positions.length;
+      toast.success(`${n} stand${n > 1 ? "s" : ""} placed!`);
       setPlacementMode(false);
     } catch {
-      toast.error("Failed to place stand");
+      toast.error("Failed to place stands");
     } finally {
       setSaving(false);
     }
@@ -184,9 +193,11 @@ export default function HallEditorPage() {
           hall={hall}
           onShelfToggle={handleShelfToggle}
           onShelfDelete={handleShelfDelete}
-          onFloorClick={placementMode ? handleFloorClick : undefined}
+          onLineDrop={placementMode ? handleLineDrop : undefined}
           placementMode={placementMode}
           ghostLevels={selectedLevels}
+          ghostWidth={form.width}
+          ghostDepth={form.depth}
         />
 
         {/* Empty state CTA */}
