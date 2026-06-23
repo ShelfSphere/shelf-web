@@ -137,14 +137,14 @@ export default function NewHallPage() {
     try {
       let supermarketId: string;
       try {
-        const res = await api.get<{ id: string }>("/supermarkets/mine");
-        supermarketId = res.data.id;
+        const res = await api.get<{ id?: string; _id?: string }>("/supermarkets/mine");
+        supermarketId = res.data.id ?? res.data._id!;
       } catch {
-        const res = await api.post<{ id: string }>("/supermarkets", {
+        const res = await api.post<{ id?: string; _id?: string }>("/supermarkets", {
           name: "My Supermarket",
           address: "To be updated",
         });
-        supermarketId = res.data.id;
+        supermarketId = res.data.id ?? res.data._id!;
       }
       const hallRes = await api.post<{ id: string }>("/halls", { ...data, supermarketId });
       toast.success("Hall created!");
