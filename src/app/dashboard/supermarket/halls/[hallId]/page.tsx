@@ -120,14 +120,15 @@ export default function HallEditorPage() {
   };
 
   const handlePositionUpdate = async (shelfId: string, x: number, z: number) => {
+    // Optimistic update — move stand immediately, sync to API in background
+    setHall(prev => prev ? {
+      ...prev,
+      shelves: prev.shelves.map(s => s.id === shelfId ? { ...s, positionX: x, positionZ: z } : s),
+    } : prev);
     try {
       await api.put(`/shelves/${shelfId}`, { positionX: x, positionZ: z });
-      setHall(prev => prev ? {
-        ...prev,
-        shelves: prev.shelves.map(s => s.id === shelfId ? { ...s, positionX: x, positionZ: z } : s),
-      } : prev);
     } catch {
-      toast.error("Failed to update position");
+      toast.error("Failed to save new position");
     }
   };
 
