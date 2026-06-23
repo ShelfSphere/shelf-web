@@ -8,6 +8,11 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Plus, Pencil, Trash2, MoveHorizontal, MoveVertical, ArrowRight, Building2, Layers } from "lucide-react";
 import { toast } from "sonner";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent } from "@/components/ui/card";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { Separator } from "@/components/ui/separator";
 
 const container = { hidden: {}, show: { transition: { staggerChildren: 0.07 } } };
 const item = { hidden: { opacity: 0, y: 20 }, show: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 300, damping: 28 } } };
@@ -103,15 +108,12 @@ export default function HallsPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">My Halls</h1>
-          <p className="text-gray-400 text-sm mt-0.5">{halls.length} hall{halls.length !== 1 ? "s" : ""} configured</p>
+          <h1 className="text-2xl font-bold">My Halls</h1>
+          <p className="text-muted-foreground text-sm mt-0.5">{halls.length} hall{halls.length !== 1 ? "s" : ""} configured</p>
         </div>
-        <Link
-          href="/dashboard/supermarket/halls/new"
-          className="flex items-center gap-2 px-5 py-2.5 bg-brand-navy text-white text-sm font-semibold rounded-xl hover:bg-brand-navy/90 transition-colors shadow-lg shadow-brand-navy/20"
-        >
-          <Plus size={15} /> New hall
-        </Link>
+        <Button asChild className="bg-brand-navy hover:bg-brand-navy/90 shadow-sm">
+          <Link href="/dashboard/supermarket/halls/new"><Plus size={15} className="mr-1.5" /> New hall</Link>
+        </Button>
       </div>
 
       {halls.length === 0 ? (
@@ -147,55 +149,57 @@ export default function HallsPage() {
                 key={hall.id}
                 variants={item}
                 exit={{ opacity: 0, scale: 0.95, transition: { duration: 0.2 } }}
-                className="group bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-lg transition-shadow overflow-hidden"
               >
-                {/* Mini 3D preview */}
-                <div className="h-36 bg-gradient-to-br from-gray-50 to-blue-50/30 flex items-center justify-center px-8 py-4 border-b border-gray-100">
-                  <HallMiniPreview w={hall.width} d={hall.depth} h={hall.height} />
-                </div>
-
-                <div className="p-5">
-                  <div className="flex items-start justify-between gap-2 mb-3">
-                    <h2 className="font-bold text-gray-900 truncate">{hall.name}</h2>
-                    <div className="flex items-center gap-1 flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <Link
-                        href={`/dashboard/supermarket/halls/${hall.id}`}
-                        className="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-gray-100 text-gray-400 hover:text-brand-navy transition-colors"
-                      >
-                        <Pencil size={13} />
-                      </Link>
-                      <button
-                        onClick={() => setConfirmHall(hall)}
-                        disabled={deletingId === hall.id}
-                        className="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-red-50 text-gray-400 hover:text-red-500 transition-colors"
-                      >
-                        <Trash2 size={13} />
-                      </button>
+                <Card className="group overflow-hidden hover:shadow-lg transition-shadow">
+                  <div className="h-36 bg-gradient-to-br from-muted/60 to-blue-50/30 flex items-center justify-center px-8 py-4 border-b">
+                    <HallMiniPreview w={hall.width} d={hall.depth} h={hall.height} />
+                  </div>
+                  <CardContent className="p-5">
+                    <div className="flex items-start justify-between gap-2 mb-3">
+                      <h2 className="font-bold truncate">{hall.name}</h2>
+                      <TooltipProvider>
+                        <div className="flex items-center gap-1 flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Button variant="ghost" size="icon" className="h-7 w-7" asChild>
+                                <Link href={`/dashboard/supermarket/halls/${hall.id}`}><Pencil size={13} /></Link>
+                              </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>Open editor</TooltipContent>
+                          </Tooltip>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Button variant="ghost" size="icon" className="h-7 w-7 hover:bg-red-50 hover:text-red-500"
+                                onClick={() => setConfirmHall(hall)} disabled={deletingId === hall.id}>
+                                <Trash2 size={13} />
+                              </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>Delete hall</TooltipContent>
+                          </Tooltip>
+                        </div>
+                      </TooltipProvider>
                     </div>
-                  </div>
 
-                  <div className="flex flex-wrap gap-3 mb-4">
-                    <span className="flex items-center gap-1 text-xs text-gray-400">
-                      <MoveHorizontal size={11} /> {hall.width}m
-                    </span>
-                    <span className="flex items-center gap-1 text-xs text-gray-400">
-                      <ArrowRight size={11} /> {hall.depth}m
-                    </span>
-                    <span className="flex items-center gap-1 text-xs text-gray-400">
-                      <MoveVertical size={11} /> {hall.height}m
-                    </span>
-                    <span className="flex items-center gap-1 text-xs font-medium text-gray-500">
-                      <Layers size={11} /> {hall.shelves?.length ?? 0} shelf{(hall.shelves?.length ?? 0) !== 1 ? "ves" : ""}
-                    </span>
-                  </div>
+                    <div className="flex flex-wrap gap-2 mb-4">
+                      <Badge variant="secondary" className="gap-1 text-xs font-normal">
+                        <MoveHorizontal size={10} /> {hall.width}m
+                      </Badge>
+                      <Badge variant="secondary" className="gap-1 text-xs font-normal">
+                        <ArrowRight size={10} /> {hall.depth}m
+                      </Badge>
+                      <Badge variant="secondary" className="gap-1 text-xs font-normal">
+                        <MoveVertical size={10} /> {hall.height}m
+                      </Badge>
+                      <Badge variant="outline" className="gap-1 text-xs font-normal">
+                        <Layers size={10} /> {hall.shelves?.length ?? 0} shelves
+                      </Badge>
+                    </div>
 
-                  <Link
-                    href={`/dashboard/supermarket/halls/${hall.id}`}
-                    className="w-full flex items-center justify-center gap-2 py-2 bg-brand-navy/5 hover:bg-brand-navy text-brand-navy hover:text-white rounded-xl text-xs font-semibold transition-colors"
-                  >
-                    Open 3D editor
-                  </Link>
-                </div>
+                    <Button variant="outline" size="sm" className="w-full hover:bg-brand-navy hover:text-white hover:border-brand-navy transition-colors" asChild>
+                      <Link href={`/dashboard/supermarket/halls/${hall.id}`}>Open 3D editor</Link>
+                    </Button>
+                  </CardContent>
+                </Card>
               </motion.div>
             ))}
           </AnimatePresence>

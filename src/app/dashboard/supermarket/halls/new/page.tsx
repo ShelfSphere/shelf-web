@@ -9,6 +9,11 @@ import { api } from "@/lib/api";
 import { toast } from "sonner";
 import { Loader2, MoveHorizontal, MoveVertical, Layers, Lightbulb, ArrowRight } from "lucide-react";
 import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Card, CardContent } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
 
 const schema = z.object({
   name: z.string().min(2, "Name is required"),
@@ -174,67 +179,66 @@ export default function NewHallPage() {
 
       <div className="grid lg:grid-cols-2 gap-6">
         {/* Form */}
-        <form
-          onSubmit={handleSubmit(onSubmit)}
-          className="bg-white rounded-2xl border border-gray-100 shadow-sm p-7 space-y-7 flex flex-col"
-        >
-          <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-1.5">Hall name</label>
-            <input
-              {...register("name")}
-              className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand-orange/30 focus:border-brand-orange transition-colors"
-              placeholder="e.g. Main Hall, North Wing…"
-            />
-            {errors.name && <p className="text-red-500 text-xs mt-1">{errors.name.message}</p>}
-          </div>
+        <Card className="flex flex-col">
+          <form onSubmit={handleSubmit(onSubmit)}>
+            <CardContent className="p-7 space-y-6">
+              <div className="space-y-2">
+                <Label htmlFor="hall-name">Hall name</Label>
+                <Input
+                  id="hall-name"
+                  {...register("name")}
+                  placeholder="e.g. Main Hall, North Wing…"
+                />
+                {errors.name && <p className="text-destructive text-xs">{errors.name.message}</p>}
+              </div>
 
-          <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-4">Dimensions</label>
-            <div className="grid grid-cols-3 gap-4">
-              {DIMENSION_FIELDS.map(({ key, label, unit, icon: Icon }) => (
-                <div key={key}>
-                  <div className="flex items-center gap-1.5 mb-2">
-                    <Icon size={13} className="text-gray-400" />
-                    <span className="text-xs font-semibold text-gray-500">{label}</span>
-                  </div>
-                  <div className="relative">
-                    <input
-                      type="number"
-                      step="0.5"
-                      {...register(key)}
-                      className="w-full border border-gray-200 rounded-xl px-3 py-3 pr-8 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-brand-orange/30 focus:border-brand-orange transition-colors"
-                    />
-                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-400 font-medium">{unit}</span>
-                  </div>
-                  {errors[key] && <p className="text-red-500 text-xs mt-1">{errors[key]?.message}</p>}
+              <Separator />
+
+              <div className="space-y-3">
+                <Label>Dimensions</Label>
+                <div className="grid grid-cols-3 gap-4">
+                  {DIMENSION_FIELDS.map(({ key, label, unit, icon: Icon }) => (
+                    <div key={key} className="space-y-2">
+                      <Label htmlFor={`dim-${key}`} className="flex items-center gap-1.5 text-xs text-muted-foreground font-normal">
+                        <Icon size={12} /> {label}
+                      </Label>
+                      <div className="relative">
+                        <Input
+                          id={`dim-${key}`}
+                          type="number"
+                          step="0.5"
+                          {...register(key)}
+                          className="pr-8"
+                        />
+                        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">{unit}</span>
+                      </div>
+                      {errors[key] && <p className="text-destructive text-xs">{errors[key]?.message}</p>}
+                    </div>
+                  ))}
                 </div>
-              ))}
-            </div>
-          </div>
+              </div>
 
-          <div className="bg-amber-50 rounded-xl border border-amber-100 p-4 space-y-2">
-            <div className="flex items-center gap-2">
-              <Lightbulb size={13} className="text-amber-500" />
-              <p className="text-xs font-semibold text-amber-700 uppercase tracking-wider">Tips</p>
-            </div>
-            <ul className="space-y-1.5 text-xs text-amber-700 leading-relaxed">
-              <li>• Standard halls are 20–50m wide and 3–5m tall.</li>
-              <li>• Shelf placement and pricing are set in the 3D editor.</li>
-            </ul>
-          </div>
+              <Separator />
 
-          <button
-            type="submit"
-            disabled={loading}
-            className="mt-auto w-full flex items-center justify-center gap-2 py-3.5 bg-brand-navy text-white font-semibold rounded-xl hover:bg-brand-navy/90 transition-colors disabled:opacity-60 shadow-lg shadow-brand-navy/20"
-          >
-            {loading ? (
-              <><Loader2 size={16} className="animate-spin" /> Creating…</>
-            ) : (
-              <><Layers size={16} /> Create hall &amp; open editor</>
-            )}
-          </button>
-        </form>
+              <Card className="bg-amber-50 border-amber-100">
+                <CardContent className="pt-4 pb-4 space-y-2">
+                  <div className="flex items-center gap-2">
+                    <Lightbulb size={13} className="text-amber-500" />
+                    <p className="text-xs font-semibold text-amber-700 uppercase tracking-wider">Tips</p>
+                  </div>
+                  <ul className="space-y-1 text-xs text-amber-700 leading-relaxed">
+                    <li>• Standard halls are 20–50m wide and 3–5m tall.</li>
+                    <li>• Shelf placement and pricing are set in the 3D editor.</li>
+                  </ul>
+                </CardContent>
+              </Card>
+
+              <Button type="submit" disabled={loading} className="w-full bg-brand-navy hover:bg-brand-navy/90 shadow-sm">
+                {loading ? <><Loader2 size={15} className="animate-spin mr-2" />Creating…</> : <><Layers size={15} className="mr-2" />Create hall &amp; open editor</>}
+              </Button>
+            </CardContent>
+          </form>
+        </Card>
 
         {/* Preview panel */}
         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-7 flex flex-col">
