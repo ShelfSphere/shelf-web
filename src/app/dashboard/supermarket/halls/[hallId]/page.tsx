@@ -188,6 +188,28 @@ export default function HallEditorPage() {
           placementMode={placementMode}
           ghostLevels={selectedLevels}
         />
+
+        {/* Empty state CTA */}
+        {hall.shelves.length === 0 && !placementMode && (
+          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+            <motion.div
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="pointer-events-auto flex flex-col items-center gap-3 bg-white/80 backdrop-blur-sm border border-gray-200 rounded-2xl px-8 py-6 shadow-lg text-center"
+            >
+              <div className="w-12 h-12 rounded-xl bg-brand-navy/8 border border-brand-navy/12 flex items-center justify-center">
+                <Layers size={22} className="text-brand-navy/50" />
+              </div>
+              <div>
+                <p className="font-semibold text-gray-800 text-sm">No stands yet</p>
+                <p className="text-xs text-gray-400 mt-0.5">Place your first gondola stand in the hall</p>
+              </div>
+              <Button onClick={() => setSheetOpen(true)} size="sm" className="bg-brand-navy hover:bg-brand-navy/90 shadow-sm mt-1">
+                <Plus size={14} className="mr-1.5" /> Add stand
+              </Button>
+            </motion.div>
+          </div>
+        )}
         {saving && (
           <div className="absolute inset-0 bg-black/20 flex items-center justify-center z-20">
             <Card className="px-6 py-4">
