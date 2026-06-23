@@ -373,6 +373,7 @@ export default function HallEditor3D({
   const [selectedLevel, setSelectedLevel] = useState<LevelSelection | null>(null);
   const [dragging, setDragging] = useState<DragState | null>(null);
   const [dragPreview, setDragPreview] = useState<{ x: number; z: number } | null>(null);
+  const [confirmDelete, setConfirmDelete] = useState(false);
 
   // Refs so DragManager callbacks always read the latest values — no stale closures
   const draggingRef = useRef(dragging);
@@ -383,9 +384,29 @@ export default function HallEditor3D({
   selectedStandRef.current = selectedStand;
   const onPositionUpdateRef = useRef(onPositionUpdate);
   onPositionUpdateRef.current = onPositionUpdate;
+  const onShelfDeleteRef = useRef(onShelfDelete);
+  onShelfDeleteRef.current = onShelfDelete;
 
   useEffect(() => {
     if (placementMode) { setSelectedStand(null); setSelectedLevel(null); }
+  }, [placementMode]);
+
+  // Delete key shortcut
+  useEffect(() => {
+    const handleKey = (e: KeyboardEvent) => {
+      if ((e.key === "Delete" || e.key === "Backspace") && selectedStandRef.current && !placementMode) {
+        // Only trigger if not focused on an input
+        if (document.activeElement?.tagName === "INPUT" || document.activeElement?.tagName === "TEXTAREA") return;
+        setConfirmDelete(true);
+      }
+      if (e.key === "Escape") {
+        setConfirmDelete(false);
+        setSelectedStand(null);
+        setSelectedLevel(null);
+      }
+    };
+    window.addEventListener("keydown", handleKey);
+    return () => window.removeEventListener("keydown", handleKey);
   }, [placementMode]);
 
   const handleStandPointerDown = (e: ThreeEvent<PointerEvent>, stand: Shelf) => {
@@ -430,9 +451,11 @@ export default function HallEditor3D({
       const curStand = selectedStandRef.current;
       if (curStand?.id === drag.stand.id) {
         setSelectedStand(null);
+        setConfirmDelete(false);
       } else {
         setSelectedStand(drag.stand);
         setSelectedLevel(null);
+        setConfirmDelete(false);
       }
     }
 
@@ -487,6 +510,7 @@ export default function HallEditor3D({
 
           <p className="text-[10px] text-gray-400 bg-gray-50 rounded-lg px-2.5 py-1.5 leading-relaxed">
             Click &amp; drag to reposition. Double-click a shelf board to select a level.
+            Press <kbd className="font-mono bg-white border border-gray-200 rounded px-1">Del</kbd> to delete.
           </p>
 
           <button
@@ -500,13 +524,33 @@ export default function HallEditor3D({
             {selectedStand.isAvailable ? "Mark as booked" : "Mark as available"}
           </button>
 
-          {onShelfDelete && (
+          {onShelfDelete && !confirmDelete && (
             <button
-              onClick={() => { onShelfDelete(selectedStand.id); setSelectedStand(null); }}
-              className="w-full py-2 rounded-xl text-xs font-semibold text-gray-400 hover:text-red-500 hover:bg-red-50 border border-gray-100 transition-colors"
+              onClick={() => setConfirmDelete(true)}
+              className="w-full py-2 rounded-xl text-xs font-semibold text-red-400 hover:text-red-600 hover:bg-red-50 border border-red-100 transition-colors"
             >
-              Remove stand
+              Delete stand
             </button>
+          )}
+
+          {onShelfDelete && confirmDelete && (
+            <div className="space-y-2">
+              <p className="text-xs text-center text-gray-500">Are you sure?</p>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => setConfirmDelete(false)}
+                  className="flex-1 py-2 rounded-xl text-xs font-semibold text-gray-500 bg-gray-100 hover:bg-gray-200 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={() => { onShelfDelete(selectedStand.id); setSelectedStand(null); setConfirmDelete(false); }}
+                  className="flex-1 py-2 rounded-xl text-xs font-semibold text-white bg-red-500 hover:bg-red-600 transition-colors"
+                >
+                  Delete
+                </button>
+              </div>
+            </div>
           )}
         </div>
       )}
