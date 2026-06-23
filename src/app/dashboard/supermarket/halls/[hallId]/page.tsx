@@ -119,6 +119,18 @@ export default function HallEditorPage() {
     }
   };
 
+  const handlePositionUpdate = async (shelfId: string, x: number, z: number) => {
+    try {
+      await api.put(`/shelves/${shelfId}`, { positionX: x, positionZ: z });
+      setHall(prev => prev ? {
+        ...prev,
+        shelves: prev.shelves.map(s => s.id === shelfId ? { ...s, positionX: x, positionZ: z } : s),
+      } : prev);
+    } catch {
+      toast.error("Failed to update position");
+    }
+  };
+
   const handleShelfToggle = async (shelfId: string, isAvailable: boolean) => {
     try {
       await api.put(`/shelves/${shelfId}`, { isAvailable });
@@ -194,6 +206,7 @@ export default function HallEditorPage() {
           onShelfToggle={handleShelfToggle}
           onShelfDelete={handleShelfDelete}
           onLineDrop={placementMode ? handleLineDrop : undefined}
+          onPositionUpdate={handlePositionUpdate}
           placementMode={placementMode}
           ghostLevels={selectedLevels}
           ghostWidth={form.width}

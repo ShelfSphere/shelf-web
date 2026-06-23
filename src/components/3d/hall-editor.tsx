@@ -1,8 +1,9 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Canvas, ThreeEvent, useThree } from "@react-three/fiber";
 import { OrbitControls, Grid, Text } from "@react-three/drei";
+import * as THREE from "three";
 import type { Hall, Shelf } from "@/types";
 
 interface Props {
@@ -10,6 +11,7 @@ interface Props {
   onShelfToggle?: (shelfId: string, isAvailable: boolean) => void;
   onShelfDelete?: (shelfId: string) => void;
   onLineDrop?: (positions: { x: number; z: number }[], rotation: number) => void;
+  onPositionUpdate?: (shelfId: string, x: number, z: number) => void;
   placementMode?: boolean;
   readonly?: boolean;
   ghostLevels?: number;
@@ -17,18 +19,89 @@ interface Props {
   ghostDepth?: number;
 }
 
-// ─── Stand mesh (gondola: red uprights + cream boards) ────────────────────────
+interface DragState {
+  stand: Shelf;
+  startClientX: number;
+  startClientY: number;
+  clickedObject: THREE.Object3D | null;
+}
+
+interface LevelSelection {
+  stand: Shelf;
+  levelIndex: number; // 0-based, 0 = bottom
+}
+
+// ─── Drag manager: tracks pointer on canvas to move stands ───────────────────
+
+function DragManager({
+  dragging,
+  onDragMove,
+  onDragEnd,
+}: {
+  dragging: DragState | null;
+  onDragMove: (x: number, z: number) => void;
+  onDragEnd: (x: number, z: number, didDrag: boolean) => void;
+}) {
+  const { camera, gl } = useThree();
+  const floorPlane = useRef(new THREE.Plane(new THREE.Vector3(0, 1, 0), 0));
+  const ray = useRef(new THREE.Raycaster());
+
+  const getPoint = useCallback((e: PointerEvent) => {
+    const rect = gl.domElement.getBoundingClientRect();
+    const ndc = new THREE.Vector2(
+      ((e.clientX - rect.left) / rect.width) * 2 - 1,
+      -((e.clientY - rect.top) / rect.height) * 2 + 1,
+    );
+    ray.current.setFromCamera(ndc, camera);
+    const pt = new THREE.Vector3();
+    ray.current.ray.intersectPlane(floorPlane.current, pt);
+    return { x: Math.round(pt.x * 2) / 2, z: Math.round(pt.z * 2) / 2 };
+  }, [camera, gl]);
+
+  useEffect(() => {
+    if (!dragging) return;
+    const canvas = gl.domElement;
+
+    const handleMove = (e: PointerEvent) => {
+      const { x, z } = getPoint(e);
+      onDragMove(x, z);
+    };
+    const handleUp = (e: PointerEvent) => {
+      const dx = e.clientX - dragging.startClientX;
+      const dy = e.clientY - dragging.startClientY;
+      const { x, z } = getPoint(e);
+      onDragEnd(x, z, Math.sqrt(dx * dx + dy * dy) > 8);
+    };
+
+    canvas.addEventListener("pointermove", handleMove);
+    canvas.addEventListener("pointerup", handleUp);
+    return () => {
+      canvas.removeEventListener("pointermove", handleMove);
+      canvas.removeEventListener("pointerup", handleUp);
+    };
+  }, [dragging, getPoint, onDragMove, onDragEnd, gl]);
+
+  return null;
+}
+
+// ─── Stand mesh ───────────────────────────────────────────────────────────────
 
 function StandMesh({
   shelf,
-  onClick,
+  onPointerDown,
   selected,
+  selectedLevelIndex,
+  overridePosX,
+  overridePosZ,
 }: {
   shelf: Shelf;
-  onClick?: () => void;
+  onPointerDown: (e: ThreeEvent<PointerEvent>) => void;
   selected: boolean;
+  selectedLevelIndex: number | null;
+  overridePosX?: number;
+  overridePosZ?: number;
 }) {
-  const [hovered, setHovered] = useState(false);
+  const [hoveredLevel, setHoveredLevel] = useState<number | null>(null);
 
   const levels = shelf.levels ?? 4;
   const standH = shelf.height;
@@ -36,39 +109,55 @@ function StandMesh({
   const uprightW = 0.06;
   const boardT = 0.035;
 
-  const accent = selected ? "#b91c1c" : hovered ? "#c0392b" : "#dc2626";
-  const board  = selected ? "#ede0cc" : "#f5ede0";
+  const posX = overridePosX ?? shelf.positionX;
+  const posZ = overridePosZ ?? shelf.positionZ;
+
+  const accentColor = selected ? "#b91c1c" : "#dc2626";
+
+  const boardColor = (i: number) => {
+    if (i === selectedLevelIndex) return "#fbbf24"; // selected = amber
+    if (i === hoveredLevel) return "#fde68a";       // hovered = light amber
+    return "#f5ede0";                               // normal = cream
+  };
 
   return (
     <group
-      position={[shelf.positionX, 0, shelf.positionZ]}
+      position={[posX, 0, posZ]}
       rotation={[0, shelf.rotation ?? 0, 0]}
-      onClick={(e) => { e.stopPropagation(); onClick?.(); }}
-      onPointerOver={(e) => { e.stopPropagation(); setHovered(true); document.body.style.cursor = "pointer"; }}
-      onPointerOut={() => { setHovered(false); document.body.style.cursor = "auto"; }}
+      onPointerDown={onPointerDown}
     >
-      {/* Left end cap */}
+      {/* Left upright */}
       <mesh position={[-shelf.width / 2 + uprightW / 2, standH / 2, 0]} castShadow>
         <boxGeometry args={[uprightW, standH, shelf.depth]} />
-        <meshStandardMaterial color={accent} roughness={0.35} metalness={0.08} />
+        <meshStandardMaterial color={accentColor} roughness={0.35} metalness={0.08} />
       </mesh>
-      {/* Right end cap */}
+      {/* Right upright */}
       <mesh position={[shelf.width / 2 - uprightW / 2, standH / 2, 0]} castShadow>
         <boxGeometry args={[uprightW, standH, shelf.depth]} />
-        <meshStandardMaterial color={accent} roughness={0.35} metalness={0.08} />
+        <meshStandardMaterial color={accentColor} roughness={0.35} metalness={0.08} />
       </mesh>
       {/* Back panel */}
-      <mesh position={[0, standH / 2, -shelf.depth / 2 + 0.015]} castShadow>
+      <mesh position={[0, standH / 2, -shelf.depth / 2 + 0.015]}>
         <boxGeometry args={[shelf.width - uprightW * 2, standH, 0.025]} />
         <meshStandardMaterial color="#f0e8d8" roughness={0.7} />
       </mesh>
-      {/* Shelf boards */}
+
+      {/* Shelf boards — each independently clickable/hoverable */}
       {Array.from({ length: levels + 1 }).map((_, i) => (
-        <mesh key={i} position={[0, i * levelH, 0]} castShadow receiveShadow>
+        <mesh
+          key={i}
+          position={[0, i * levelH, 0]}
+          castShadow
+          receiveShadow
+          userData={{ isBoard: true, levelIdx: i }}
+          onPointerOver={(e) => { e.stopPropagation(); setHoveredLevel(i); document.body.style.cursor = "pointer"; }}
+          onPointerOut={(e) => { e.stopPropagation(); setHoveredLevel(null); document.body.style.cursor = "auto"; }}
+        >
           <boxGeometry args={[shelf.width, boardT, shelf.depth]} />
-          <meshStandardMaterial color={board} roughness={0.65} />
+          <meshStandardMaterial color={boardColor(i)} roughness={0.65} />
         </mesh>
       ))}
+
       {/* Selection glow */}
       {selected && (
         <mesh position={[0, standH / 2, 0]}>
@@ -76,6 +165,7 @@ function StandMesh({
           <meshStandardMaterial color="#2563eb" transparent opacity={0.07} />
         </mesh>
       )}
+
       {/* Labels */}
       <Text position={[0, standH + 0.18, 0]} fontSize={0.15} color="#1e293b"
         anchorX="center" anchorY="bottom" outlineWidth={0.008} outlineColor="#ffffff">
@@ -92,9 +182,7 @@ function StandMesh({
 
 // ─── Ghost stand preview ──────────────────────────────────────────────────────
 
-function GhostStand({
-  x, z, width, depth, levels, rotation = 0,
-}: {
+function GhostStand({ x, z, width, depth, levels, rotation = 0 }: {
   x: number; z: number; width: number; depth: number; levels: number; rotation?: number;
 }) {
   const standH = levels * 0.45 + 0.05;
@@ -116,11 +204,7 @@ function GhostStand({
 
 type DragRow = { positions: { x: number; z: number }[]; rotation: number };
 
-function computeRow(
-  start: [number, number],
-  end: [number, number],
-  standWidth: number,
-): DragRow {
+function computeRow(start: [number, number], end: [number, number], standWidth: number): DragRow {
   const dx = end[0] - start[0];
   const dz = end[1] - start[1];
   const alongX = Math.abs(dx) >= Math.abs(dz);
@@ -128,7 +212,6 @@ function computeRow(
   const count = Math.max(1, Math.round(length / standWidth));
   const rotation = alongX ? 0 : Math.PI / 2;
   const positions: { x: number; z: number }[] = [];
-
   for (let i = 0; i < count; i++) {
     if (alongX) {
       const sign = dx >= 0 ? 1 : -1;
@@ -141,14 +224,7 @@ function computeRow(
   return { positions, rotation };
 }
 
-function Floor({
-  hall,
-  onLineDrop,
-  placementMode,
-  ghostLevels = 4,
-  ghostWidth = 2,
-  ghostDepth = 0.5,
-}: {
+function Floor({ hall, onLineDrop, placementMode, ghostLevels = 4, ghostWidth = 2, ghostDepth = 0.5 }: {
   hall: Hall;
   onLineDrop?: (positions: { x: number; z: number }[], rotation: number) => void;
   placementMode?: boolean;
@@ -157,47 +233,10 @@ function Floor({
   ghostDepth?: number;
 }) {
   const snap = (v: number) => Math.round(v * 2) / 2;
-
-  // Use refs so values are always fresh inside event handlers
   const dragStartRef = useRef<[number, number] | null>(null);
   const isDraggingRef = useRef(false);
-  // Trigger re-renders when drag state changes
   const [dragRow, setDragRow] = useState<DragRow | null>(null);
   const [hoverPos, setHoverPos] = useState<[number, number] | null>(null);
-
-  const onPointerDown = (e: ThreeEvent<PointerEvent>) => {
-    if (!placementMode) return;
-    e.stopPropagation();
-    // Capture pointer so moves register even when moving fast
-    (e.nativeEvent.target as Element).setPointerCapture(e.nativeEvent.pointerId);
-    const pt: [number, number] = [snap(e.point.x), snap(e.point.z)];
-    dragStartRef.current = pt;
-    isDraggingRef.current = true;
-    setDragRow({ positions: [{ x: pt[0], z: pt[1] }], rotation: 0 });
-  };
-
-  const onPointerMove = (e: ThreeEvent<PointerEvent>) => {
-    if (!placementMode) return;
-    e.stopPropagation();
-    const pt: [number, number] = [snap(e.point.x), snap(e.point.z)];
-    setHoverPos(pt);
-    if (isDraggingRef.current && dragStartRef.current) {
-      setDragRow(computeRow(dragStartRef.current, pt, ghostWidth));
-    }
-  };
-
-  const onPointerUp = (e: ThreeEvent<PointerEvent>) => {
-    if (!placementMode || !isDraggingRef.current) return;
-    e.stopPropagation();
-    isDraggingRef.current = false;
-    if (dragStartRef.current) {
-      const pt: [number, number] = [snap(e.point.x), snap(e.point.z)];
-      const row = computeRow(dragStartRef.current, pt, ghostWidth);
-      onLineDrop?.(row.positions, row.rotation);
-    }
-    dragStartRef.current = null;
-    setDragRow(null);
-  };
 
   const standH = ghostLevels * 0.45 + 0.05;
 
@@ -206,55 +245,68 @@ function Floor({
       <mesh
         position={[0, -0.05, 0]}
         receiveShadow
-        onPointerDown={onPointerDown}
-        onPointerMove={onPointerMove}
-        onPointerUp={onPointerUp}
+        onPointerDown={(e) => {
+          if (!placementMode) return;
+          e.stopPropagation();
+          (e.nativeEvent.target as Element).setPointerCapture(e.nativeEvent.pointerId);
+          isDraggingRef.current = true;
+          const pt: [number, number] = [snap(e.point.x), snap(e.point.z)];
+          dragStartRef.current = pt;
+          setDragRow({ positions: [{ x: pt[0], z: pt[1] }], rotation: 0 });
+        }}
+        onPointerMove={(e) => {
+          if (!placementMode) return;
+          e.stopPropagation();
+          const pt: [number, number] = [snap(e.point.x), snap(e.point.z)];
+          setHoverPos(pt);
+          if (isDraggingRef.current && dragStartRef.current)
+            setDragRow(computeRow(dragStartRef.current, pt, ghostWidth));
+        }}
+        onPointerUp={(e) => {
+          if (!placementMode || !isDraggingRef.current) return;
+          e.stopPropagation();
+          isDraggingRef.current = false;
+          if (dragStartRef.current) {
+            const pt: [number, number] = [snap(e.point.x), snap(e.point.z)];
+            const row = computeRow(dragStartRef.current, pt, ghostWidth);
+            onLineDrop?.(row.positions, row.rotation);
+          }
+          dragStartRef.current = null;
+          setDragRow(null);
+        }}
         onPointerLeave={() => { if (!isDraggingRef.current) setHoverPos(null); }}
       >
         <boxGeometry args={[hall.width, 0.1, hall.depth]} />
         <meshStandardMaterial color={placementMode ? "#dedad3" : "#e8e5df"} roughness={0.8} />
       </mesh>
 
-      {/* Ghost stands: dragging row OR single hover */}
       {dragRow
         ? dragRow.positions.map((p, i) => (
             <GhostStand key={i} x={p.x} z={p.z} width={ghostWidth} depth={ghostDepth}
               levels={ghostLevels} rotation={dragRow.rotation} />
           ))
         : hoverPos
-        ? <GhostStand x={hoverPos[0]} z={hoverPos[1]} width={ghostWidth} depth={ghostDepth}
-            levels={ghostLevels} />
+        ? <GhostStand x={hoverPos[0]} z={hoverPos[1]} width={ghostWidth} depth={ghostDepth} levels={ghostLevels} />
         : null}
 
-      {/* Row count label */}
       {dragRow && dragRow.positions.length > 1 && (() => {
         const mid = dragRow.positions[Math.floor(dragRow.positions.length / 2)];
         return (
-          <Text
-            position={[mid.x, standH + 0.5, mid.z]}
-            fontSize={0.28}
-            color="#1e40af"
-            anchorX="center"
-            anchorY="bottom"
-            outlineWidth={0.015}
-            outlineColor="#ffffff"
-          >
+          <Text position={[mid.x, standH + 0.5, mid.z]} fontSize={0.28} color="#1e40af"
+            anchorX="center" anchorY="bottom" outlineWidth={0.015} outlineColor="#ffffff">
             {`×${dragRow.positions.length} stands`}
           </Text>
         );
       })()}
 
-      {/* Drag line strip on floor */}
       {dragRow && dragRow.positions.length > 1 && (() => {
         const first = dragRow.positions[0];
-        const last  = dragRow.positions[dragRow.positions.length - 1];
+        const last = dragRow.positions[dragRow.positions.length - 1];
         const cx = (first.x + last.x) / 2;
         const cz = (first.z + last.z) / 2;
-        const totalLen = dragRow.positions.length * ghostWidth;
-        const isAlongX = dragRow.rotation === 0;
         return (
           <mesh position={[cx, 0.02, cz]} rotation={[0, dragRow.rotation, 0]}>
-            <boxGeometry args={[totalLen, 0.01, ghostDepth + 0.1]} />
+            <boxGeometry args={[dragRow.positions.length * ghostWidth, 0.01, ghostDepth + 0.1]} />
             <meshStandardMaterial color="#2563eb" transparent opacity={0.12} />
           </mesh>
         );
@@ -263,28 +315,27 @@ function Floor({
   );
 }
 
-// ─── Hall walls & ceiling ─────────────────────────────────────────────────────
+// ─── Hall walls ───────────────────────────────────────────────────────────────
 
 function HallWalls({ hall }: { hall: Hall }) {
   const { width, depth, height } = hall;
   return (
     <group>
-      <mesh position={[0, height + 0.05, 0]} receiveShadow>
+      {/* Ceiling — ghost outline only */}
+      <mesh position={[0, height + 0.05, 0]}>
         <boxGeometry args={[width, 0.1, depth]} />
-        <meshStandardMaterial color="#dbd8d0" roughness={0.85} />
+        <meshStandardMaterial color="#94a3b8" transparent opacity={0.08} roughness={0.85} />
       </mesh>
-      <mesh position={[0, height / 2, -depth / 2]}>
-        <boxGeometry args={[width, height, 0.15]} />
-        <meshStandardMaterial color="#d8d5ce" roughness={0.85} />
-      </mesh>
-      <mesh position={[-width / 2, height / 2, 0]}>
-        <boxGeometry args={[0.15, height, depth]} />
-        <meshStandardMaterial color="#d8d5ce" roughness={0.85} />
-      </mesh>
-      <mesh position={[width / 2, height / 2, 0]}>
-        <boxGeometry args={[0.15, height, depth]} />
-        <meshStandardMaterial color="#d8d5ce" roughness={0.85} />
-      </mesh>
+      {/* Walls — transparent with edge tint */}
+      {[{ pos: [0, height / 2, -depth / 2] as [number,number,number], args: [width, height, 0.15] as [number,number,number] },
+        { pos: [-width / 2, height / 2, 0] as [number,number,number], args: [0.15, height, depth] as [number,number,number] },
+        { pos: [width / 2, height / 2, 0] as [number,number,number], args: [0.15, height, depth] as [number,number,number] }
+      ].map(({ pos, args }, i) => (
+        <mesh key={i} position={pos}>
+          <boxGeometry args={args} />
+          <meshStandardMaterial color="#93c5fd" transparent opacity={0.10} roughness={0.8} side={THREE.DoubleSide} />
+        </mesh>
+      ))}
       {[-width / 3, 0, width / 3].map((x, i) => (
         <mesh key={i} position={[x, height - 0.04, 0]}>
           <boxGeometry args={[0.25, 0.04, depth * 0.8]} />
@@ -302,30 +353,93 @@ export default function HallEditor3D({
   onShelfToggle,
   onShelfDelete,
   onLineDrop,
+  onPositionUpdate,
   placementMode = false,
   readonly = false,
   ghostLevels = 4,
   ghostWidth = 2,
   ghostDepth = 0.5,
 }: Props) {
-  const [selected, setSelected] = useState<Shelf | null>(null);
+  const [selectedStand, setSelectedStand] = useState<Shelf | null>(null);
+  const [selectedLevel, setSelectedLevel] = useState<LevelSelection | null>(null);
+  const [dragging, setDragging] = useState<DragState | null>(null);
+  const [dragPreview, setDragPreview] = useState<{ x: number; z: number } | null>(null);
 
-  const handleClick = (shelf: Shelf) => {
+  // When placement mode activates, clear selections
+  useEffect(() => {
+    if (placementMode) { setSelectedStand(null); setSelectedLevel(null); }
+  }, [placementMode]);
+
+  const handleStandPointerDown = (e: ThreeEvent<PointerEvent>, stand: Shelf) => {
     if (readonly || placementMode) return;
-    setSelected(selected?.id === shelf.id ? null : shelf);
+    e.stopPropagation();
+    setDragging({
+      stand,
+      startClientX: e.nativeEvent.clientX,
+      startClientY: e.nativeEvent.clientY,
+      clickedObject: e.object,
+    });
   };
+
+  const handleDragMove = useCallback((x: number, z: number) => {
+    setDragPreview({ x, z });
+  }, []);
+
+  const handleDragEnd = useCallback((x: number, z: number, didDrag: boolean) => {
+    if (!dragging) return;
+
+    if (didDrag) {
+      onPositionUpdate?.(dragging.stand.id, x, z);
+    } else {
+      // Click: check if a board was clicked
+      const obj = dragging.clickedObject;
+      if (obj?.userData?.isBoard && obj.userData.levelIdx < (dragging.stand.levels ?? 4)) {
+        const levelIdx = obj.userData.levelIdx as number;
+        // Toggle level selection
+        if (selectedLevel?.stand.id === dragging.stand.id && selectedLevel.levelIndex === levelIdx) {
+          setSelectedLevel(null);
+        } else {
+          setSelectedLevel({ stand: dragging.stand, levelIndex: levelIdx });
+          setSelectedStand(null);
+        }
+      } else {
+        // Toggle stand selection
+        if (selectedStand?.id === dragging.stand.id) {
+          setSelectedStand(null);
+        } else {
+          setSelectedStand(dragging.stand);
+          setSelectedLevel(null);
+        }
+      }
+    }
+
+    setDragging(null);
+    setDragPreview(null);
+  }, [dragging, selectedLevel, selectedStand, onPositionUpdate]);
+
+  // Compute level display info
+  const levelInfo = (() => {
+    if (!selectedLevel) return null;
+    const { stand, levelIndex } = selectedLevel;
+    const levels = stand.levels ?? 4;
+    const levelH = stand.height / levels;
+    const fromFloor = Math.round(levelIndex * levelH * 100);
+    const toFloor = Math.round((levelIndex + 1) * levelH * 100);
+    return { stand, levelIndex, levels, fromFloor, toFloor };
+  })();
 
   return (
     <div className="relative w-full h-full">
-      {/* Selected stand panel */}
-      {selected && !readonly && !placementMode && (
+
+      {/* ── Stand info panel ────────────────────────────── */}
+      {selectedStand && !placementMode && (
         <div className="absolute top-4 left-4 z-10 bg-white/95 backdrop-blur border border-gray-200 rounded-2xl shadow-xl p-5 w-64 space-y-4">
           <div className="flex items-start justify-between">
             <div>
-              <h3 className="font-bold text-gray-900 text-sm">{selected.name}</h3>
-              <p className="text-xs text-gray-400 mt-0.5">{selected.levels ?? 4} shelf levels</p>
+              <h3 className="font-bold text-gray-900 text-sm">{selectedStand.name}</h3>
+              <p className="text-xs text-gray-400 mt-0.5">{selectedStand.levels ?? 4} shelf levels</p>
             </div>
-            <button onClick={() => setSelected(null)} className="text-gray-300 hover:text-gray-600 transition-colors">
+            <button onClick={() => setSelectedStand(null)} className="text-gray-300 hover:text-gray-600">
               <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
                 <path d="M1 1l12 12M13 1L1 13" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
               </svg>
@@ -333,28 +447,38 @@ export default function HallEditor3D({
           </div>
 
           <div className="space-y-1.5 text-xs text-gray-400">
-            <div className="flex justify-between"><span>Price</span>
-              <span className="text-gray-700 font-semibold">${selected.pricePerDay}/day</span></div>
-            <div className="flex justify-between"><span>Size</span>
-              <span className="text-gray-700">{selected.width}×{selected.height.toFixed(2)}×{selected.depth}m</span></div>
-            <div className="flex justify-between"><span>Position</span>
-              <span className="text-gray-700">({selected.positionX}, {selected.positionZ})</span></div>
+            <div className="flex justify-between">
+              <span>Price</span>
+              <span className="text-gray-700 font-semibold">${selectedStand.pricePerDay}/day</span>
+            </div>
+            <div className="flex justify-between">
+              <span>Size</span>
+              <span className="text-gray-700">{selectedStand.width}×{selectedStand.height.toFixed(2)}×{selectedStand.depth}m</span>
+            </div>
+            <div className="flex justify-between">
+              <span>Position</span>
+              <span className="text-gray-700">X: {selectedStand.positionX}, Z: {selectedStand.positionZ}</span>
+            </div>
           </div>
 
+          <p className="text-[10px] text-gray-400 bg-gray-50 rounded-lg px-2.5 py-1.5 leading-relaxed">
+            Drag the stand on the floor to reposition it. Click a shelf board to select a level.
+          </p>
+
           <button
-            onClick={() => { onShelfToggle?.(selected.id, !selected.isAvailable); setSelected(null); }}
+            onClick={() => { onShelfToggle?.(selectedStand.id, !selectedStand.isAvailable); setSelectedStand(null); }}
             className={`w-full py-2 rounded-xl text-xs font-semibold transition-colors border ${
-              selected.isAvailable
+              selectedStand.isAvailable
                 ? "bg-red-50 hover:bg-red-100 text-red-600 border-red-200"
                 : "bg-green-50 hover:bg-green-100 text-green-600 border-green-200"
             }`}
           >
-            {selected.isAvailable ? "Mark as booked" : "Mark as available"}
+            {selectedStand.isAvailable ? "Mark as booked" : "Mark as available"}
           </button>
 
           {onShelfDelete && (
             <button
-              onClick={() => { onShelfDelete(selected.id); setSelected(null); }}
+              onClick={() => { onShelfDelete(selectedStand.id); setSelectedStand(null); }}
               className="w-full py-2 rounded-xl text-xs font-semibold text-gray-400 hover:text-red-500 hover:bg-red-50 border border-gray-100 transition-colors"
             >
               Remove stand
@@ -363,13 +487,60 @@ export default function HallEditor3D({
         </div>
       )}
 
-      {/* Placement hint */}
+      {/* ── Level info panel ────────────────────────────── */}
+      {levelInfo && !placementMode && (
+        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-10 bg-white/95 backdrop-blur border border-amber-200 rounded-2xl shadow-xl px-5 py-4 flex items-center gap-5 min-w-80">
+          {/* Level visualiser */}
+          <div className="flex flex-col-reverse gap-0.5 flex-shrink-0">
+            {Array.from({ length: levelInfo.levels }).map((_, i) => (
+              <div
+                key={i}
+                className={`w-8 h-3 rounded-sm border transition-colors ${
+                  i === levelInfo.levelIndex
+                    ? "bg-amber-400 border-amber-500"
+                    : "bg-gray-100 border-gray-200"
+                }`}
+              />
+            ))}
+          </div>
+
+          <div className="flex-1 min-w-0">
+            <p className="text-xs text-gray-400 leading-none">{levelInfo.stand.name}</p>
+            <p className="font-bold text-gray-900 text-sm mt-0.5">
+              Level {levelInfo.levelIndex + 1}
+              <span className="font-normal text-gray-400 ml-1">of {levelInfo.levels}</span>
+            </p>
+            <p className="text-xs text-gray-400 mt-0.5">{levelInfo.fromFloor}cm – {levelInfo.toFloor}cm from floor</p>
+          </div>
+
+          <div className="flex flex-col items-end gap-2">
+            <span className="text-[10px] bg-amber-50 text-amber-600 border border-amber-200 rounded-full px-2 py-0.5 font-medium whitespace-nowrap">
+              Per-level pricing soon
+            </span>
+            <button
+              onClick={() => setSelectedLevel(null)}
+              className="text-xs text-gray-400 hover:text-gray-600 transition-colors"
+            >
+              Deselect
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* ── Drag-to-place hint ───────────────────────────── */}
       {placementMode && (
         <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-10 bg-white/90 backdrop-blur border border-gray-200 rounded-full px-5 py-2.5 flex items-center gap-2 shadow-lg">
           <div className="w-2 h-2 rounded-full bg-blue-500 animate-pulse" />
           <span className="text-gray-700 text-xs font-semibold">
             Click &amp; drag to fill a row — or click to place a single stand
           </span>
+        </div>
+      )}
+
+      {/* ── Dragging indicator ───────────────────────────── */}
+      {dragging && dragPreview && (
+        <div className="absolute top-4 left-1/2 -translate-x-1/2 z-10 bg-blue-600 text-white rounded-full px-4 py-1.5 text-xs font-semibold shadow-lg pointer-events-none">
+          Moving {dragging.stand.name}…
         </div>
       )}
 
@@ -384,6 +555,8 @@ export default function HallEditor3D({
         <directionalLight position={[-8, 12, -8]} intensity={0.8} />
         <pointLight position={[0, hall.height - 0.1, 0]} intensity={1.8} color="#fff8f0" distance={hall.width * 3} />
 
+        <DragManager dragging={dragging} onDragMove={handleDragMove} onDragEnd={handleDragEnd} />
+
         <HallWalls hall={hall} />
         <Floor
           hall={hall}
@@ -395,7 +568,15 @@ export default function HallEditor3D({
         />
 
         {hall.shelves.map((shelf) => (
-          <StandMesh key={shelf.id} shelf={shelf} onClick={() => handleClick(shelf)} selected={selected?.id === shelf.id} />
+          <StandMesh
+            key={shelf.id}
+            shelf={shelf}
+            onPointerDown={(e) => handleStandPointerDown(e, shelf)}
+            selected={selectedStand?.id === shelf.id}
+            selectedLevelIndex={selectedLevel?.stand.id === shelf.id ? selectedLevel.levelIndex : null}
+            overridePosX={dragging?.stand.id === shelf.id ? dragPreview?.x : undefined}
+            overridePosZ={dragging?.stand.id === shelf.id ? dragPreview?.z : undefined}
+          />
         ))}
 
         <Grid
@@ -412,9 +593,10 @@ export default function HallEditor3D({
         />
 
         <OrbitControls
-          enablePan={!placementMode}
+          enabled={!dragging && !placementMode}
+          enablePan
           enableZoom
-          enableRotate={!placementMode}
+          enableRotate
           minDistance={2}
           maxDistance={40}
           maxPolarAngle={Math.PI / 2 - 0.05}
