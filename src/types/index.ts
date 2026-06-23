@@ -40,6 +40,7 @@ export interface Shelf {
   depth: number;
   height: number;
   tier: ShelfTier;
+  levels: number;
   pricePerDay: number;
   isAvailable: boolean;
 }
