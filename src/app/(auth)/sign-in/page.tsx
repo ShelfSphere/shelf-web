@@ -15,7 +15,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Form, FormControl, FormField, FormItem, FormMessage } from "@/components/ui/form";
-import { Loader2 } from "lucide-react";
+import { Loader2, ShoppingCart, Store } from "lucide-react";
 
 const schema = z.object({
   email: z.string().email("Invalid email"),
@@ -27,6 +27,7 @@ export default function SignInPage() {
   const router = useRouter();
   const t = useTranslations("auth.signIn");
   const [loading, setLoading] = useState(false);
+  const [googleRole, setGoogleRole] = useState<"PRODUCT_OWNER" | "SUPERMARKET">("PRODUCT_OWNER");
 
   const form = useForm<FormData>({ resolver: zodResolver(schema) });
 
@@ -47,7 +48,30 @@ export default function SignInPage() {
       <h1 className="text-2xl font-bold text-brand-navy mb-1">{t("title")}</h1>
       <p className="text-sm text-muted-foreground mb-6">{t("subtitle")}</p>
 
-      <GoogleButton label="Continue with Google" />
+      <div className="mb-3">
+        <p className="text-xs font-medium text-gray-500 mb-2">I am a…</p>
+        <div className="grid grid-cols-2 gap-3">
+          {([
+            { value: "PRODUCT_OWNER" as const, label: "Brand / Owner", icon: ShoppingCart,
+              active: "border-brand-green bg-brand-green/5 text-brand-green" },
+            { value: "SUPERMARKET"   as const, label: "Supermarket",   icon: Store,
+              active: "border-brand-orange bg-brand-orange/5 text-brand-orange" },
+          ]).map(({ value, label, icon: Icon, active }) => (
+            <button
+              key={value}
+              type="button"
+              onClick={() => setGoogleRole(value)}
+              className={`flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all text-sm font-medium ${
+                googleRole === value ? active : "border-gray-200 text-gray-500 hover:border-gray-300"
+              }`}
+            >
+              <Icon size={22} />
+              {label}
+            </button>
+          ))}
+        </div>
+      </div>
+      <GoogleButton label="Continue with Google" role={googleRole} />
       <Divider />
 
       <Form {...form}>

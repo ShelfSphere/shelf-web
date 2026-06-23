@@ -31,17 +31,21 @@ export const authOptions: NextAuthOptions = {
     }),
   ],
   callbacks: {
-    async signIn({ user, account }) {
+    async signIn({ user, account, profile: _profile }, ...rest) {
       if (account?.provider === "google") {
         try {
+          const { cookies } = await import("next/headers");
+          const cookieStore = await cookies();
+          const pendingRole = cookieStore.get("pending_role")?.value ?? "PRODUCT_OWNER";
+
           const res = await api.post("/auth/google-signin", {
             googleId: account.providerAccountId,
             email: user.email,
             name: user.name,
             image: user.image,
+            role: pendingRole,
           });
           const { accessToken, refreshToken, role } = res.data;
-          // Attach tokens to user object for jwt callback
           (user as any).accessToken = accessToken;
           (user as any).refreshToken = refreshToken;
           (user as any).role = role;

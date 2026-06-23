@@ -17,14 +17,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Form, FormControl, FormField, FormItem, FormMessage } from "@/components/ui/form";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Loader2 } from "lucide-react";
+import { Loader2, ShoppingCart, Store } from "lucide-react";
 import type { UserRole } from "@/types";
 
 const schema = z.object({
@@ -46,6 +39,8 @@ function SignUpForm() {
     resolver: zodResolver(schema),
     defaultValues: { role: defaultRole },
   });
+
+  const selectedRole = form.watch("role");
 
   const onSubmit = async (data: FormData) => {
     setLoading(true);
@@ -71,9 +66,6 @@ function SignUpForm() {
       <h1 className="text-2xl font-bold text-brand-navy mb-1">{t("title")}</h1>
       <p className="text-sm text-muted-foreground mb-6">{t("subtitle")}</p>
 
-      <GoogleButton label="Sign up with Google" />
-      <Divider />
-
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
           <FormField
@@ -82,21 +74,33 @@ function SignUpForm() {
             render={({ field }) => (
               <FormItem>
                 <Label>{t("iAm")}</Label>
-                <Select onValueChange={field.onChange} defaultValue={field.value}>
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    <SelectItem value="PRODUCT_OWNER">{t("productOwner")}</SelectItem>
-                    <SelectItem value="SUPERMARKET">{t("supermarket")}</SelectItem>
-                  </SelectContent>
-                </Select>
+                <div className="grid grid-cols-2 gap-3 mt-1">
+                  {([
+                    { value: "PRODUCT_OWNER", label: t("productOwner"), icon: ShoppingCart,
+                      active: "border-brand-green bg-brand-green/5 text-brand-green" },
+                    { value: "SUPERMARKET",   label: t("supermarket"),   icon: Store,
+                      active: "border-brand-orange bg-brand-orange/5 text-brand-orange" },
+                  ] as const).map(({ value, label, icon: Icon, active }) => (
+                    <button
+                      key={value}
+                      type="button"
+                      onClick={() => field.onChange(value)}
+                      className={`flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all text-sm font-medium ${
+                        field.value === value ? active : "border-gray-200 text-gray-500 hover:border-gray-300"
+                      }`}
+                    >
+                      <Icon size={22} />
+                      {label}
+                    </button>
+                  ))}
+                </div>
                 <FormMessage />
               </FormItem>
             )}
           />
+
+          <GoogleButton label="Sign up with Google" role={selectedRole} />
+          <Divider />
           <FormField
             control={form.control}
             name="name"
