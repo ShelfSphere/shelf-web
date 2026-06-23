@@ -7,6 +7,7 @@ import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { Plus, Pencil, Trash2, MoveHorizontal, MoveVertical, ArrowRight, Building2, Layers } from "lucide-react";
 import { toast } from "sonner";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 
 const container = { hidden: {}, show: { transition: { staggerChildren: 0.07 } } };
 const item = { hidden: { opacity: 0, y: 20 }, show: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 300, damping: 28 } } };
@@ -56,6 +57,7 @@ export default function HallsPage() {
   const [halls, setHalls] = useState<Hall[]>([]);
   const [loading, setLoading] = useState(true);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [confirmHall, setConfirmHall] = useState<Hall | null>(null);
 
   const fetchHalls = () => {
     api.get<Supermarket>("/supermarkets/mine")
@@ -67,8 +69,8 @@ export default function HallsPage() {
   useEffect(() => { fetchHalls(); }, []);
 
   const handleDelete = async (hall: Hall) => {
-    if (!confirm(`Delete "${hall.name}"? This cannot be undone.`)) return;
     setDeletingId(hall.id);
+    setConfirmHall(null);
     try {
       await api.delete(`/halls/${hall.id}`);
       toast.success(`"${hall.name}" deleted`);
@@ -163,7 +165,7 @@ export default function HallsPage() {
                         <Pencil size={13} />
                       </Link>
                       <button
-                        onClick={() => handleDelete(hall)}
+                        onClick={() => setConfirmHall(hall)}
                         disabled={deletingId === hall.id}
                         className="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-red-50 text-gray-400 hover:text-red-500 transition-colors"
                       >
@@ -199,6 +201,14 @@ export default function HallsPage() {
           </AnimatePresence>
         </motion.div>
       )}
+      <ConfirmDialog
+        open={!!confirmHall}
+        title={`Delete "${confirmHall?.name}"?`}
+        description="This will permanently remove the hall and all its shelves. This cannot be undone."
+        confirmLabel="Delete hall"
+        onConfirm={() => confirmHall && handleDelete(confirmHall)}
+        onCancel={() => setConfirmHall(null)}
+      />
     </div>
   );
 }
