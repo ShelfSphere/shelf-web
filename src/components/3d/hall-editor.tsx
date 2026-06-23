@@ -24,6 +24,7 @@ interface DragState {
   startClientX: number;
   startClientY: number;
   clickedObject: THREE.Object3D | null;
+  allowDrag: boolean; // only true when stand was already selected on pointer-down
 }
 
 interface LevelSelection {
@@ -89,6 +90,7 @@ function DragManager({
 function StandMesh({
   shelf,
   onPointerDown,
+  onBoardDoubleClick,
   selected,
   selectedLevelIndex,
   overridePosX,
@@ -96,6 +98,7 @@ function StandMesh({
 }: {
   shelf: Shelf;
   onPointerDown: (e: ThreeEvent<PointerEvent>) => void;
+  onBoardDoubleClick: (levelIdx: number) => void;
   selected: boolean;
   selectedLevelIndex: number | null;
   overridePosX?: number;
@@ -125,6 +128,8 @@ function StandMesh({
       position={[posX, 0, posZ]}
       rotation={[0, shelf.rotation ?? 0, 0]}
       onPointerDown={onPointerDown}
+      onPointerOver={(e) => { e.stopPropagation(); document.body.style.cursor = selected ? "grab" : "pointer"; }}
+      onPointerOut={() => { document.body.style.cursor = "auto"; }}
     >
       {/* Left upright */}
       <mesh position={[-shelf.width / 2 + uprightW / 2, standH / 2, 0]} castShadow>
@@ -142,7 +147,7 @@ function StandMesh({
         <meshStandardMaterial color="#f0e8d8" roughness={0.7} />
       </mesh>
 
-      {/* Shelf boards — each independently clickable/hoverable */}
+      {/* Shelf boards — double-click to select level */}
       {Array.from({ length: levels + 1 }).map((_, i) => (
         <mesh
           key={i}
@@ -150,8 +155,12 @@ function StandMesh({
           castShadow
           receiveShadow
           userData={{ isBoard: true, levelIdx: i }}
-          onPointerOver={(e) => { e.stopPropagation(); setHoveredLevel(i); document.body.style.cursor = "pointer"; }}
-          onPointerOut={(e) => { e.stopPropagation(); setHoveredLevel(null); document.body.style.cursor = "auto"; }}
+          onPointerOver={(e) => { e.stopPropagation(); setHoveredLevel(i); document.body.style.cursor = i < levels ? "zoom-in" : "auto"; }}
+          onPointerOut={(e) => { e.stopPropagation(); setHoveredLevel(null); document.body.style.cursor = selected ? "grab" : "pointer"; }}
+          onDoubleClick={(e) => {
+            e.stopPropagation();
+            if (i < levels) onBoardDoubleClick(i);
+          }}
         >
           <boxGeometry args={[shelf.width, boardT, shelf.depth]} />
           <meshStandardMaterial color={boardColor(i)} roughness={0.65} />
@@ -382,45 +391,48 @@ export default function HallEditor3D({
   const handleStandPointerDown = (e: ThreeEvent<PointerEvent>, stand: Shelf) => {
     if (readonly || placementMode) return;
     e.stopPropagation();
+    const alreadySelected = selectedStandRef.current?.id === stand.id;
     setDragging({
       stand,
       startClientX: e.nativeEvent.clientX,
       startClientY: e.nativeEvent.clientY,
       clickedObject: e.object,
+      allowDrag: alreadySelected, // drag only works on the second interaction
     });
+    if (alreadySelected) document.body.style.cursor = "grabbing";
+  };
+
+  const handleBoardDoubleClick = (stand: Shelf, levelIdx: number) => {
+    const curLevel = selectedLevelRef.current;
+    if (curLevel !== null && curLevel.stand.id === stand.id && curLevel.levelIndex === levelIdx) {
+      setSelectedLevel(null);
+    } else {
+      setSelectedLevel({ stand, levelIndex: levelIdx });
+      setSelectedStand(null);
+    }
   };
 
   const handleDragMove = useCallback((x: number, z: number) => {
-    setDragPreview({ x, z });
+    if (draggingRef.current?.allowDrag) setDragPreview({ x, z });
   }, []);
 
   // Empty deps — always reads from refs so it's never stale
   const handleDragEnd = useCallback((x: number, z: number, didDrag: boolean) => {
     const drag = draggingRef.current;
     if (!drag) return;
+    document.body.style.cursor = "auto";
 
-    if (didDrag) {
+    if (didDrag && drag.allowDrag) {
+      // Move the stand to the new position
       onPositionUpdateRef.current?.(drag.stand.id, x, z);
     } else {
-      const obj = drag.clickedObject;
-      const levels = drag.stand.levels ?? 4;
-      if (obj?.userData?.isBoard === true && typeof obj.userData.levelIdx === "number" && obj.userData.levelIdx < levels) {
-        const levelIdx = obj.userData.levelIdx as number;
-        const curLevel = selectedLevelRef.current;
-        if (curLevel !== null && curLevel.stand.id === drag.stand.id && curLevel.levelIndex === levelIdx) {
-          setSelectedLevel(null);
-        } else {
-          setSelectedLevel({ stand: drag.stand, levelIndex: levelIdx });
-          setSelectedStand(null);
-        }
+      // Single click → select / deselect stand
+      const curStand = selectedStandRef.current;
+      if (curStand?.id === drag.stand.id) {
+        setSelectedStand(null);
       } else {
-        const curStand = selectedStandRef.current;
-        if (curStand?.id === drag.stand.id) {
-          setSelectedStand(null);
-        } else {
-          setSelectedStand(drag.stand);
-          setSelectedLevel(null);
-        }
+        setSelectedStand(drag.stand);
+        setSelectedLevel(null);
       }
     }
 
@@ -474,7 +486,7 @@ export default function HallEditor3D({
           </div>
 
           <p className="text-[10px] text-gray-400 bg-gray-50 rounded-lg px-2.5 py-1.5 leading-relaxed">
-            Drag the stand on the floor to reposition it. Click a shelf board to select a level.
+            Click &amp; drag to reposition. Double-click a shelf board to select a level.
           </p>
 
           <button
@@ -585,6 +597,7 @@ export default function HallEditor3D({
             shelf={shelf}
             onPointerDown={(e) => handleStandPointerDown(e, shelf)}
             selected={selectedStand?.id === shelf.id}
+            onBoardDoubleClick={(lvl) => handleBoardDoubleClick(shelf, lvl)}
             selectedLevelIndex={
               selectedLevel != null && selectedLevel.stand != null && selectedLevel.levelIndex != null && selectedLevel.stand.id === shelf.id
                 ? selectedLevel.levelIndex
