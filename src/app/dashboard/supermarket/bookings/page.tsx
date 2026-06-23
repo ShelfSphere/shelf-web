@@ -6,7 +6,7 @@ import { api } from "@/lib/api";
 import type { Booking } from "@/types";
 import { toast } from "sonner";
 import { format } from "date-fns";
-import { CalendarDays, DollarSign, Store } from "lucide-react";
+import { CalendarDays, DollarSign, Store, Inbox } from "lucide-react";
 
 const STATUS_CONFIG: Record<string, { label: string; classes: string; dot: string }> = {
   PENDING:   { label: "Pending",   classes: "bg-amber-50 text-amber-600 border border-amber-200",  dot: "bg-amber-400" },
@@ -56,7 +56,7 @@ export default function SupermarketBookingsPage() {
           animate={{ opacity: 1, scale: 1 }}
           className="flex flex-col items-center justify-center py-24 text-center"
         >
-          <div className="text-5xl mb-4">📭</div>
+          <div className="w-20 h-20 rounded-3xl bg-gray-100 flex items-center justify-center mb-5"><Inbox size={36} className="text-gray-400" /></div>
           <h3 className="font-bold text-gray-800 text-lg mb-2">No bookings yet</h3>
           <p className="text-gray-400 text-sm max-w-xs">
             Once brands book your shelves, their requests will appear here.

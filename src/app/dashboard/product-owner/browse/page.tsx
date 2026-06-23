@@ -7,14 +7,14 @@ import type { Shelf, ShelfTier } from "@/types";
 import { toast } from "sonner";
 import { ShelfCard } from "@/components/shelves/shelf-card";
 import { BookingModal } from "@/components/shelves/booking-modal";
-import { Search, SlidersHorizontal, X } from "lucide-react";
+import { Search, SlidersHorizontal, X, Eye, AlignCenter, ArrowUp, ArrowDown, ShoppingBag, LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-const TIERS: { value: ShelfTier; label: string; emoji: string }[] = [
-  { value: "EYE_LEVEL", label: "Eye Level", emoji: "👁️" },
-  { value: "MIDDLE",    label: "Middle",    emoji: "↔️" },
-  { value: "TOP",       label: "Top",       emoji: "⬆️" },
-  { value: "BOTTOM",    label: "Bottom",    emoji: "⬇️" },
+const TIERS: { value: ShelfTier; label: string; icon: LucideIcon }[] = [
+  { value: "EYE_LEVEL", label: "Eye Level", icon: Eye },
+  { value: "MIDDLE",    label: "Middle",    icon: AlignCenter },
+  { value: "TOP",       label: "Top",       icon: ArrowUp },
+  { value: "BOTTOM",    label: "Bottom",    icon: ArrowDown },
 ];
 
 function EmptyState({ hasFilters }: { hasFilters: boolean }) {
@@ -24,7 +24,9 @@ function EmptyState({ hasFilters }: { hasFilters: boolean }) {
       animate={{ opacity: 1, scale: 1 }}
       className="flex flex-col items-center justify-center py-24 text-center"
     >
-      <div className="text-5xl mb-4">{hasFilters ? "🔍" : "🛍️"}</div>
+      <div className="w-20 h-20 rounded-3xl bg-gray-100 flex items-center justify-center mb-5">
+        {hasFilters ? <Search size={36} className="text-gray-400" /> : <ShoppingBag size={36} className="text-gray-400" />}
+      </div>
       <h3 className="font-bold text-gray-800 text-lg mb-2">
         {hasFilters ? "No shelves match your filters" : "No shelves available right now"}
       </h3>
@@ -106,7 +108,7 @@ export default function BrowsePage() {
                   : "bg-white text-gray-500 border-gray-200 hover:border-gray-300"
               )}
             >
-              {t.emoji} {t.label}
+              <t.icon size={12} /> {t.label}
             </button>
           ))}
         </div>

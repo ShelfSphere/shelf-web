@@ -3,7 +3,7 @@
 import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { Store, Plus, CalendarDays, ArrowRight, Sparkles, TrendingUp, Layers } from "lucide-react";
+import { Store, Plus, CalendarDays, ArrowRight, Sparkles, TrendingUp, Layers, Building2 } from "lucide-react";
 
 const container = { hidden: {}, show: { transition: { staggerChildren: 0.08 } } };
 const item = { hidden: { opacity: 0, y: 20 }, show: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 300, damping: 28 } } };
@@ -17,13 +17,13 @@ export default function SupermarketDashboard() {
       {/* Hero greeting */}
       <motion.div variants={item} className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#0f1729] to-[#1a2a4a] p-8 text-white">
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_60%_80%_at_80%_50%,rgba(235,115,28,0.12),transparent)]" />
-        <div className="absolute top-4 right-6 text-5xl opacity-20 select-none">🏪</div>
+        <div className="absolute top-4 right-6 opacity-10 select-none"><Building2 size={72} /></div>
         <div className="relative z-10">
           <div className="flex items-center gap-2 mb-3">
             <Sparkles size={14} className="text-brand-orange" />
             <span className="text-xs text-brand-orange font-semibold uppercase tracking-widest">Supermarket Portal</span>
           </div>
-          <h1 className="text-3xl font-bold mb-1">Welcome back, {firstName}! 👋</h1>
+          <h1 className="text-3xl font-bold mb-1">Welcome back, {firstName}!</h1>
           <p className="text-white/50 text-sm max-w-md">
             Manage your hall layouts, list shelf space, and accept bookings from brands.
           </p>

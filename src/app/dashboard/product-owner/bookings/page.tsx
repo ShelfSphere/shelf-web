@@ -21,7 +21,7 @@ function EmptyState() {
       animate={{ opacity: 1, scale: 1 }}
       className="flex flex-col items-center justify-center py-24 text-center"
     >
-      <div className="w-20 h-20 rounded-3xl bg-gray-100 flex items-center justify-center mb-5 text-4xl">📦</div>
+      <div className="w-20 h-20 rounded-3xl bg-gray-100 flex items-center justify-center mb-5"><Inbox size={36} className="text-gray-400" /></div>
       <h3 className="font-bold text-gray-800 text-lg mb-2">No bookings yet</h3>
       <p className="text-gray-400 text-sm max-w-xs">
         Once you book a shelf, your campaigns will appear here. Start by browsing available shelves.

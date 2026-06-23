@@ -3,16 +3,16 @@
 import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { Search, CalendarDays, TrendingUp, ArrowRight, Sparkles, Eye, BarChart3 } from "lucide-react";
+import { Search, CalendarDays, TrendingUp, ArrowRight, Sparkles, Eye, BarChart3, ShoppingCart, AlignCenter, ArrowUp, ArrowDown, Handshake } from "lucide-react";
 
 const container = { hidden: {}, show: { transition: { staggerChildren: 0.08 } } };
 const item = { hidden: { opacity: 0, y: 20 }, show: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 300, damping: 28 } } };
 
 const TIERS = [
-  { emoji: "👁️", name: "Eye-level", desc: "Premium visibility", color: "from-brand-green/20 to-emerald-400/10", badge: "Most booked" },
-  { emoji: "↔️", name: "Middle", desc: "Balanced price / reach", color: "from-blue-500/20 to-cyan-400/10", badge: null },
-  { emoji: "⬆️", name: "Top", desc: "Aspirational placement", color: "from-purple-500/20 to-violet-400/10", badge: null },
-  { emoji: "⬇️", name: "Bottom", desc: "Budget-friendly", color: "from-orange-400/20 to-amber-300/10", badge: "Best value" },
+  { icon: Eye, name: "Eye-level", desc: "Premium visibility", color: "from-brand-green/20 to-emerald-400/10", iconColor: "text-emerald-600", badge: "Most booked" },
+  { icon: AlignCenter, name: "Middle", desc: "Balanced price / reach", color: "from-blue-500/20 to-cyan-400/10", iconColor: "text-blue-600", badge: null },
+  { icon: ArrowUp, name: "Top", desc: "Aspirational placement", color: "from-purple-500/20 to-violet-400/10", iconColor: "text-purple-600", badge: null },
+  { icon: ArrowDown, name: "Bottom", desc: "Budget-friendly", color: "from-orange-400/20 to-amber-300/10", iconColor: "text-orange-500", badge: "Best value" },
 ];
 
 export default function ProductOwnerDashboard() {
@@ -24,13 +24,13 @@ export default function ProductOwnerDashboard() {
       {/* Hero greeting */}
       <motion.div variants={item} className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#0f1729] to-[#1a2a4a] p-8 text-white">
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_60%_80%_at_80%_50%,rgba(46,204,113,0.12),transparent)]" />
-        <div className="absolute top-4 right-6 text-5xl opacity-20 select-none">🛒</div>
+        <div className="absolute top-4 right-6 opacity-10 select-none"><ShoppingCart size={72} /></div>
         <div className="relative z-10">
           <div className="flex items-center gap-2 mb-3">
             <Sparkles size={14} className="text-brand-green" />
             <span className="text-xs text-brand-green font-semibold uppercase tracking-widest">Marketplace</span>
           </div>
-          <h1 className="text-3xl font-bold mb-1">Welcome back, {firstName}! 👋</h1>
+          <h1 className="text-3xl font-bold mb-1">Welcome back, {firstName}!</h1>
           <p className="text-white/50 text-sm max-w-md">
             Discover premium shelf positions, track your campaigns, and grow your brand visibility.
           </p>
@@ -112,7 +112,7 @@ export default function ProductOwnerDashboard() {
                   {tier.badge}
                 </span>
               )}
-              <div className="text-2xl mb-2">{tier.emoji}</div>
+              <div className="mb-2"><tier.icon size={22} className={tier.iconColor} /></div>
               <h3 className="font-bold text-gray-800 text-sm">{tier.name}</h3>
               <p className="text-xs text-gray-500 mt-0.5">{tier.desc}</p>
             </motion.div>
