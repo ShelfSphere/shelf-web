@@ -1,18 +1,17 @@
-import { withAuth } from "next-auth/middleware";
+import { withAuth, NextRequestWithAuth } from "next-auth/middleware";
 import { NextResponse } from "next/server";
-import type { NextRequest } from "next/server";
 
 const LOCALES = ["en", "ru", "hy"] as const;
 
 export default withAuth(
-  function middleware(request: NextRequest & { nextauth: { token: { role?: string } | null } }) {
+  function middleware(request: NextRequestWithAuth) {
     const { pathname } = request.nextUrl;
-    const role = request.nextauth.token?.role;
+    const role = request.nextauth.token?.role as string | undefined;
 
-    // Role-based route protection
     if (pathname.startsWith("/dashboard/supermarket") && role !== "SUPERMARKET") {
       return NextResponse.redirect(new URL("/dashboard/product-owner", request.url));
     }
+
     if (pathname.startsWith("/dashboard/product-owner") && role !== "PRODUCT_OWNER") {
       return NextResponse.redirect(new URL("/dashboard/supermarket", request.url));
     }
@@ -34,7 +33,6 @@ export default withAuth(
   {
     callbacks: {
       authorized: ({ token, req }) => {
-        // Only require auth for dashboard routes
         if (req.nextUrl.pathname.startsWith("/dashboard")) {
           return !!token;
         }
