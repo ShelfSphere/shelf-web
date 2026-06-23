@@ -365,7 +365,16 @@ export default function HallEditor3D({
   const [dragging, setDragging] = useState<DragState | null>(null);
   const [dragPreview, setDragPreview] = useState<{ x: number; z: number } | null>(null);
 
-  // When placement mode activates, clear selections
+  // Refs so DragManager callbacks always read the latest values — no stale closures
+  const draggingRef = useRef(dragging);
+  draggingRef.current = dragging;
+  const selectedLevelRef = useRef(selectedLevel);
+  selectedLevelRef.current = selectedLevel;
+  const selectedStandRef = useRef(selectedStand);
+  selectedStandRef.current = selectedStand;
+  const onPositionUpdateRef = useRef(onPositionUpdate);
+  onPositionUpdateRef.current = onPositionUpdate;
+
   useEffect(() => {
     if (placementMode) { setSelectedStand(null); setSelectedLevel(null); }
   }, [placementMode]);
@@ -385,29 +394,31 @@ export default function HallEditor3D({
     setDragPreview({ x, z });
   }, []);
 
+  // Empty deps — always reads from refs so it's never stale
   const handleDragEnd = useCallback((x: number, z: number, didDrag: boolean) => {
-    if (!dragging) return;
+    const drag = draggingRef.current;
+    if (!drag) return;
 
     if (didDrag) {
-      onPositionUpdate?.(dragging.stand.id, x, z);
+      onPositionUpdateRef.current?.(drag.stand.id, x, z);
     } else {
-      // Click: check if a board was clicked
-      const obj = dragging.clickedObject;
-      if (obj?.userData?.isBoard && obj.userData.levelIdx < (dragging.stand.levels ?? 4)) {
+      const obj = drag.clickedObject;
+      const levels = drag.stand.levels ?? 4;
+      if (obj?.userData?.isBoard === true && typeof obj.userData.levelIdx === "number" && obj.userData.levelIdx < levels) {
         const levelIdx = obj.userData.levelIdx as number;
-        // Toggle level selection
-        if (selectedLevel?.stand.id === dragging.stand.id && selectedLevel.levelIndex === levelIdx) {
+        const curLevel = selectedLevelRef.current;
+        if (curLevel !== null && curLevel.stand.id === drag.stand.id && curLevel.levelIndex === levelIdx) {
           setSelectedLevel(null);
         } else {
-          setSelectedLevel({ stand: dragging.stand, levelIndex: levelIdx });
+          setSelectedLevel({ stand: drag.stand, levelIndex: levelIdx });
           setSelectedStand(null);
         }
       } else {
-        // Toggle stand selection
-        if (selectedStand?.id === dragging.stand.id) {
+        const curStand = selectedStandRef.current;
+        if (curStand?.id === drag.stand.id) {
           setSelectedStand(null);
         } else {
-          setSelectedStand(dragging.stand);
+          setSelectedStand(drag.stand);
           setSelectedLevel(null);
         }
       }
@@ -415,13 +426,14 @@ export default function HallEditor3D({
 
     setDragging(null);
     setDragPreview(null);
-  }, [dragging, selectedLevel, selectedStand, onPositionUpdate]);
+  }, []);
 
-  // Compute level display info
+  // Compute level display info — fully guarded
   const levelInfo = (() => {
-    if (!selectedLevel) return null;
+    if (!selectedLevel || selectedLevel.levelIndex == null || !selectedLevel.stand) return null;
     const { stand, levelIndex } = selectedLevel;
     const levels = stand.levels ?? 4;
+    if (levelIndex < 0 || levelIndex >= levels) return null;
     const levelH = stand.height / levels;
     const fromFloor = Math.round(levelIndex * levelH * 100);
     const toFloor = Math.round((levelIndex + 1) * levelH * 100);
@@ -573,7 +585,11 @@ export default function HallEditor3D({
             shelf={shelf}
             onPointerDown={(e) => handleStandPointerDown(e, shelf)}
             selected={selectedStand?.id === shelf.id}
-            selectedLevelIndex={selectedLevel?.stand.id === shelf.id ? selectedLevel.levelIndex : null}
+            selectedLevelIndex={
+              selectedLevel != null && selectedLevel.stand != null && selectedLevel.levelIndex != null && selectedLevel.stand.id === shelf.id
+                ? selectedLevel.levelIndex
+                : null
+            }
             overridePosX={dragging?.stand.id === shelf.id ? dragPreview?.x : undefined}
             overridePosZ={dragging?.stand.id === shelf.id ? dragPreview?.z : undefined}
           />
