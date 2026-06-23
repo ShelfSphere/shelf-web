@@ -1,13 +1,39 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { api } from "@/lib/api";
 import type { Shelf, ShelfTier } from "@/types";
 import { toast } from "sonner";
 import { ShelfCard } from "@/components/shelves/shelf-card";
 import { BookingModal } from "@/components/shelves/booking-modal";
+import { Search, SlidersHorizontal, X } from "lucide-react";
+import { cn } from "@/lib/utils";
 
-const TIERS: ShelfTier[] = ["BOTTOM", "MIDDLE", "EYE_LEVEL", "TOP"];
+const TIERS: { value: ShelfTier; label: string; emoji: string }[] = [
+  { value: "EYE_LEVEL", label: "Eye Level", emoji: "👁️" },
+  { value: "MIDDLE",    label: "Middle",    emoji: "↔️" },
+  { value: "TOP",       label: "Top",       emoji: "⬆️" },
+  { value: "BOTTOM",    label: "Bottom",    emoji: "⬇️" },
+];
+
+function EmptyState({ hasFilters }: { hasFilters: boolean }) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, scale: 0.95 }}
+      animate={{ opacity: 1, scale: 1 }}
+      className="flex flex-col items-center justify-center py-24 text-center"
+    >
+      <div className="text-5xl mb-4">{hasFilters ? "🔍" : "🛍️"}</div>
+      <h3 className="font-bold text-gray-800 text-lg mb-2">
+        {hasFilters ? "No shelves match your filters" : "No shelves available right now"}
+      </h3>
+      <p className="text-gray-400 text-sm max-w-xs">
+        {hasFilters ? "Try adjusting your filters to see more results." : "Check back soon — new shelves are added regularly."}
+      </p>
+    </motion.div>
+  );
+}
 
 export default function BrowsePage() {
   const [shelves, setShelves] = useState<Shelf[]>([]);
@@ -15,6 +41,8 @@ export default function BrowsePage() {
   const [tierFilter, setTierFilter] = useState<ShelfTier | "">("");
   const [maxPrice, setMaxPrice] = useState("");
   const [selectedShelf, setSelectedShelf] = useState<Shelf | null>(null);
+
+  const hasFilters = !!tierFilter || !!maxPrice;
 
   const fetchShelves = async () => {
     setLoading(true);
@@ -31,64 +59,107 @@ export default function BrowsePage() {
     }
   };
 
-  useEffect(() => {
-    fetchShelves();
-  }, [tierFilter, maxPrice]);
+  useEffect(() => { fetchShelves(); }, [tierFilter, maxPrice]);
 
   return (
     <div className="space-y-6">
+      {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold text-brand-navy">Browse Available Shelves</h1>
-        <p className="text-gray-500 text-sm mt-1">
-          Green shelves are available to book.
-        </p>
+        <h1 className="text-2xl font-bold text-gray-900">Browse Shelves</h1>
+        <p className="text-gray-400 text-sm mt-1">Find and book premium shelf space across supermarkets.</p>
       </div>
 
       {/* Filters */}
-      <div className="flex flex-wrap gap-3">
-        <select
-          value={tierFilter}
-          onChange={(e) => setTierFilter(e.target.value as ShelfTier | "")}
-          className="border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-navy/20"
-        >
-          <option value="">All tiers</option>
+      <div className="bg-white rounded-2xl border border-gray-100 p-4 shadow-sm">
+        <div className="flex items-center gap-2 mb-3">
+          <SlidersHorizontal size={14} className="text-gray-400" />
+          <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Filters</span>
+          {hasFilters && (
+            <button
+              onClick={() => { setTierFilter(""); setMaxPrice(""); }}
+              className="ml-auto flex items-center gap-1 text-xs text-gray-400 hover:text-red-400 transition-colors"
+            >
+              <X size={12} /> Clear
+            </button>
+          )}
+        </div>
+        <div className="flex flex-wrap gap-2 mb-3">
+          <button
+            onClick={() => setTierFilter("")}
+            className={cn(
+              "px-3 py-1.5 rounded-full text-xs font-semibold border transition-colors",
+              !tierFilter
+                ? "bg-brand-navy text-white border-brand-navy"
+                : "bg-white text-gray-500 border-gray-200 hover:border-gray-300"
+            )}
+          >
+            All tiers
+          </button>
           {TIERS.map((t) => (
-            <option key={t} value={t}>{t.replace("_", " ")}</option>
+            <button
+              key={t.value}
+              onClick={() => setTierFilter(tierFilter === t.value ? "" : t.value)}
+              className={cn(
+                "px-3 py-1.5 rounded-full text-xs font-semibold border transition-colors flex items-center gap-1.5",
+                tierFilter === t.value
+                  ? "bg-brand-navy text-white border-brand-navy"
+                  : "bg-white text-gray-500 border-gray-200 hover:border-gray-300"
+              )}
+            >
+              {t.emoji} {t.label}
+            </button>
           ))}
-        </select>
-        <input
-          type="number"
-          placeholder="Max price / day"
-          value={maxPrice}
-          onChange={(e) => setMaxPrice(e.target.value)}
-          className="border border-gray-200 rounded-lg px-3 py-2 text-sm w-40 focus:outline-none focus:ring-2 focus:ring-brand-navy/20"
-        />
+        </div>
+        <div className="relative w-48">
+          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs">$</span>
+          <input
+            type="number"
+            placeholder="Max price / day"
+            value={maxPrice}
+            onChange={(e) => setMaxPrice(e.target.value)}
+            className="w-full pl-6 pr-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-navy/20"
+          />
+        </div>
       </div>
 
+      {/* Results */}
       {loading ? (
-        <div className="flex justify-center py-20">
-          <div className="w-8 h-8 border-4 border-brand-navy border-t-transparent rounded-full animate-spin" />
-        </div>
-      ) : shelves.length === 0 ? (
-        <div className="text-center py-20 text-gray-400">
-          <p>No available shelves match your filters.</p>
-        </div>
-      ) : (
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {shelves.map((shelf) => (
-            <ShelfCard key={shelf.id} shelf={shelf} onBook={() => setSelectedShelf(shelf)} />
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+          {[...Array(6)].map((_, i) => (
+            <div key={i} className="bg-white rounded-2xl border border-gray-100 p-5 animate-pulse h-48">
+              <div className="h-4 bg-gray-100 rounded w-2/3 mb-3" />
+              <div className="h-3 bg-gray-100 rounded w-1/2 mb-2" />
+              <div className="h-3 bg-gray-100 rounded w-1/3" />
+            </div>
           ))}
         </div>
+      ) : shelves.length === 0 ? (
+        <EmptyState hasFilters={hasFilters} />
+      ) : (
+        <>
+          <p className="text-xs text-gray-400">{shelves.length} shelf{shelves.length !== 1 ? "ves" : ""} available</p>
+          <AnimatePresence>
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+              {shelves.map((shelf, i) => (
+                <motion.div
+                  key={shelf.id}
+                  initial={{ opacity: 0, y: 16 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: i * 0.05, type: "spring", stiffness: 300, damping: 28 }}
+                >
+                  <ShelfCard shelf={shelf} onBook={() => setSelectedShelf(shelf)} />
+                </motion.div>
+              ))}
+            </div>
+          </AnimatePresence>
+        </>
       )}
 
       {selectedShelf && (
         <BookingModal
           shelf={selectedShelf}
           onClose={() => setSelectedShelf(null)}
-          onBooked={() => {
-            setSelectedShelf(null);
-            fetchShelves();
-          }}
+          onBooked={() => { setSelectedShelf(null); fetchShelves(); }}
         />
       )}
     </div>

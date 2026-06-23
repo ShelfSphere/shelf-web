@@ -3,6 +3,7 @@
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
+import { motion } from "framer-motion";
 import { DashboardNav } from "@/components/layout/dashboard-nav";
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
@@ -15,8 +16,11 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
   if (status === "loading") {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="w-8 h-8 border-4 border-brand-navy border-t-transparent rounded-full animate-spin" />
+      <div className="min-h-screen flex items-center justify-center bg-[#f8fafc]">
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-10 h-10 border-4 border-brand-green border-t-transparent rounded-full animate-spin" />
+          <p className="text-sm text-gray-400 animate-pulse">Loading your workspace…</p>
+        </div>
       </div>
     );
   }
@@ -24,9 +28,18 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   if (!session) return null;
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-[#f4f6fb] flex">
       <DashboardNav />
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">{children}</main>
+      <main className="flex-1 ml-64 min-h-screen">
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, ease: "easeOut" }}
+          className="max-w-6xl mx-auto px-8 py-10"
+        >
+          {children}
+        </motion.div>
+      </main>
     </div>
   );
 }
